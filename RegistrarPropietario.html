@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Propietario - Sistema de Pagos</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos de Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Contenedor principal -->
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+
+        <!-- Cabecera actualizada con botón de regreso -->
+        <header class="mb-8 flex justify-between items-start">
+            <div>
+                <a href="PortalAdministrador.html" class="text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1 mb-2">
+                    <i class="ph ph-arrow-left"></i>
+                    Volver al Menú de Gestión
+                </a>
+                <h1 class="text-3xl font-bold text-gray-900">Registrar Nuevo Propietario</h1>
+                <p class="text-gray-600">Complete los campos para crear un nuevo registro.</p>
+            </div>
+            <a href="Login.html" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 flex-shrink-0">
+                <i class="ph ph-sign-out"></i>
+                Cerrar Sesión
+            </a>
+        </header>
+
+        <!-- Formulario de Registro -->
+        <main class="bg-white p-8 rounded-xl shadow-md">
+            <form id="registerForm" class="space-y-8">
+                
+                <!-- Sección de Datos del Propietario -->
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4 flex items-center gap-2">
+                        <i class="ph ph-user-circle text-2xl text-blue-600"></i>
+                        Datos del Propietario
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="nombres" class="block text-sm font-medium text-gray-700">Nombres</label>
+                            <input type="text" id="nombres" name="nombres" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="apellidos" class="block text-sm font-medium text-gray-700">Apellidos</label>
+                            <input type="text" id="apellidos" name="apellidos" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="tipo_documento" class="block text-sm font-medium text-gray-700">Tipo de Documento</label>
+                            <select id="tipo_documento" name="tipo_documento" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option>DNI</option>
+                                <option>Carnet de Extranjería</option>
+                                <option>Pasaporte</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="numero_documento" class="block text-sm font-medium text-gray-700">Número de Documento</label>
+                            <input type="text" id="numero_documento" name="numero_documento" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+                            <input type="email" id="email" name="email" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="telefono" class="block text-sm font-medium text-gray-700">Teléfono</label>
+                            <input type="tel" id="telefono" name="telefono" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección de Datos del Predio -->
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4 flex items-center gap-2">
+                        <i class="ph ph-house-line text-2xl text-green-600"></i>
+                        Datos del Predio
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="torre" class="block text-sm font-medium text-gray-700">Torre / Bloque</label>
+                            <input type="text" id="torre" name="torre" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="numero_departamento" class="block text-sm font-medium text-gray-700">N° de Departamento</label>
+                            <input type="text" id="numero_departamento" name="numero_departamento" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="metros_cuadrados" class="block text-sm font-medium text-gray-700">Metros Cuadrados (m²)</label>
+                            <input type="number" id="metros_cuadrados" name="metros_cuadrados" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección de Documentación -->
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4 flex items-center gap-2">
+                        <i class="ph ph-file-pdf text-2xl text-red-600"></i>
+                        Documento de Propiedad
+                    </h2>
+                    <div>
+                        <label for="documento_propiedad" class="block text-sm font-medium text-gray-700">Contrato de Compra/Venta u otro</label>
+                        <div class="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                            <div class="space-y-1 text-center">
+                                <i class="ph ph-upload-simple text-4xl text-gray-400"></i>
+                                <div class="flex text-sm text-gray-600">
+                                    <label for="documento_propiedad_input" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                        <span>Subir un archivo</span>
+                                        <input id="documento_propiedad_input" name="documento_propiedad" type="file" class="sr-only" required>
+                                    </label>
+                                    <p class="pl-1">o arrastrar y soltar</p>
+                                </div>
+                                <p class="text-xs text-gray-500">PDF, PNG, JPG hasta 10MB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="flex justify-end gap-4 pt-4 border-t">
+                    <a href="PortalAdministrador.html" class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2">
+                        <i class="ph ph-check-circle"></i>
+                        Registrar Propietario
+                    </button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform scale-95">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="ph ph-check text-5xl text-green-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">¡Éxito!</h2>
+            <p class="text-gray-600 mt-2 mb-6">El propietario ha sido registrado correctamente. Se ha enviado un correo con sus credenciales de acceso.</p>
+            <a href="PortalAdministrador.html" class="w-full inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                Entendido
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevenir el envío real del formulario
+
+            // Simular el registro y mostrar el modal de éxito
+            const successModal = document.getElementById('successModal');
+            const modalContent = successModal.querySelector('.transform');
+            
+            successModal.classList.remove('hidden');
+            setTimeout(() => {
+                successModal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+        });
+
+        // Para mejorar la UX del input de archivo
+        const fileInput = document.getElementById('documento_propiedad_input');
+        const fileLabel = document.querySelector('label[for="documento_propiedad_input"] span');
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files.length > 0) {
+                fileLabel.textContent = this.files[0].name;
+            } else {
+                fileLabel.textContent = 'Subir un archivo';
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Reportes - Sistema de Pagos</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos de Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Contenedor principal -->
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <!-- Cabecera -->
+        <header class="mb-8">
+            <a href="PortalAdministrador.html" class="text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1 mb-2">
+                <i class="ph ph-arrow-left"></i>
+                Volver al Menú de Gestión
+            </a>
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Reportes del Condominio</h1>
+                    <p class="text-gray-600">Visualice el estado financiero y la gestión de pagos.</p>
+                </div>
+                <a href="Login.html" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 flex-shrink-0">
+                    <i class="ph ph-sign-out"></i>
+                    Cerrar Sesión
+                </a>
+            </div>
+        </header>
+
+        <!-- Tarjetas de Resumen (KPIs) - Ahora se llenan con JS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-md flex items-center gap-4">
+                <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center"><i class="ph ph-chart-line-up text-3xl"></i></div>
+                <div>
+                    <p class="text-sm text-gray-500">Recaudado (Julio)</p>
+                    <p id="kpi-recaudado" class="text-2xl font-bold text-gray-900">S/ 0</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md flex items-center gap-4">
+                <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center"><i class="ph ph-arrow-fat-lines-down text-3xl"></i></div>
+                <div>
+                    <p class="text-sm text-gray-500">Gastos (Julio)</p>
+                    <p id="kpi-gastos" class="text-2xl font-bold text-gray-900">S/ 0</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md flex items-center gap-4">
+                <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center"><i class="ph ph-warning-circle text-3xl"></i></div>
+                <div>
+                    <p class="text-sm text-gray-500">Total por Cobrar</p>
+                    <p id="kpi-por-cobrar" class="text-2xl font-bold text-gray-900">S/ 0</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center"><i class="ph ph-users-three text-3xl"></i></div>
+                <div>
+                    <p class="text-sm text-gray-500">Propietarios Morosos</p>
+                    <p id="kpi-morosos" class="text-2xl font-bold text-gray-900">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Reportes Principales -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-8">
+            <!-- Columna Izquierda: Reporte de Antigüedad de Deuda -->
+            <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Reporte de Antigüedad de Deuda</h2>
+                <div class="mb-6"><canvas id="delinquencyChart"></canvas></div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-600">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                            <tr>
+                                <th class="px-6 py-3">Propietario / Predio</th>
+                                <th class="px-6 py-3">Antigüedad</th>
+                                <th class="px-6 py-3 text-right">Monto</th>
+                                <th class="px-6 py-3 text-center">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="delinquencyTableBody">
+                            <!-- Filas generadas por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Reporte de Ingresos -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Reporte de Ingresos</h2>
+                <div class="flex justify-center mb-4">
+                    <div class="inline-flex rounded-md shadow-sm"><button id="btn-monthly" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-l-lg">Mensual</button><button id="btn-yearly" class="px-4 py-2 text-sm font-medium text-blue-600 bg-white border-t border-b border-r border-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-r-lg">Anual</button></div>
+                </div>
+                <div><canvas id="incomeChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Reporte de Gastos vs Presupuesto -->
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Reporte de Gastos vs. Presupuesto (Julio)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                <div class="md:col-span-1 h-64"><canvas id="expensesChart"></canvas></div>
+                <div class="md:col-span-2">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-600">
+                             <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                                <tr>
+                                    <th class="px-6 py-3">Categoría de Gasto</th>
+                                    <th class="px-6 py-3 text-right">Presupuesto</th>
+                                    <th class="px-6 py-3 text-right">Gasto Real</th>
+                                    <th class="px-6 py-3 text-right">Diferencia</th>
+                                </tr>
+                             </thead>
+                             <tbody id="expensesTableBody">
+                                <!-- Filas generadas por JS -->
+                             </tbody>
+                             <tfoot id="expensesTableFoot" class="font-bold text-gray-900">
+                                <!-- Fila de total generada por JS -->
+                             </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- 1. FUENTE DE DATOS CENTRALIZADA (Simulando una respuesta de API) ---
+            const reportData = {
+                kpis: {
+                    recaudadoMes: 12540,
+                    gastosMes: 11950,
+                    porCobrar: 2180,
+                    propietariosMorosos: 4
+                },
+                delinquencyReport: [
+                    { propietario: 'Sofia Vargas', predio: 'Torre C, Dpto. 1102', antiguedad: 'Más de 60 días', monto: 1100.00, antiguedadKey: 'gt60' },
+                    { propietario: 'Luis Gomez', predio: 'Torre C, Dpto. 201', antiguedad: '31-60 días', monto: 540.00, antiguedadKey: '31-60' },
+                    { propietario: 'Ana Martinez', predio: 'Torre A, Dpto. 804', antiguedad: '1-30 días', monto: 360.00, antiguedadKey: '1-30' },
+                    { propietario: 'Pedro Diaz', predio: 'Torre B, Dpto. 302', antiguedad: '1-30 días', monto: 180.00, antiguedadKey: '1-30' }
+                ],
+                incomeReport: {
+                    monthly: { labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul'], data: [11500, 10200, 13000, 12100, 11800, 14000, 12540] },
+                    yearly: { labels: ['2023', '2024', '2025 (proy.)'], data: [135000, 142000, 151000] }
+                },
+                delinquencyChartData: {
+                    labels: ['1-30 días', '31-60 días', 'Más de 60 días'],
+                    data: [540, 540, 1100]
+                },
+                expensesReport: {
+                    categories: [
+                        { categoria: 'Seguridad', presupuesto: 5000, real: 5000 },
+                        { categoria: 'Limpieza', presupuesto: 3500, real: 3400 },
+                        { categoria: 'Mantenimiento', presupuesto: 1500, real: 1850 },
+                        { categoria: 'Administración', presupuesto: 1200, real: 1200 },
+                        { categoria: 'Servicios (Luz/Agua)', presupuesto: 500, real: 500 }
+                    ]
+                }
+            };
+
+            // --- 2. FUNCIONES DE RENDERIZADO ---
+            const formatCurrency = (value) => new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(value);
+
+            function renderKPIs() {
+                document.getElementById('kpi-recaudado').textContent = formatCurrency(reportData.kpis.recaudadoMes);
+                document.getElementById('kpi-gastos').textContent = formatCurrency(reportData.kpis.gastosMes);
+                document.getElementById('kpi-por-cobrar').textContent = formatCurrency(reportData.kpis.porCobrar);
+                document.getElementById('kpi-morosos').textContent = reportData.kpis.propietariosMorosos;
+            }
+
+            function renderDelinquencyTable() {
+                const tableBody = document.getElementById('delinquencyTableBody');
+                tableBody.innerHTML = ''; // Limpiar antes de renderizar
+                reportData.delinquencyReport.forEach(item => {
+                    let colorClass = 'text-yellow-600';
+                    if (item.antiguedadKey === '31-60') colorClass = 'text-orange-600';
+                    if (item.antiguedadKey === 'gt60') colorClass = 'text-red-700';
+
+                    const row = `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="px-6 py-4 font-medium text-gray-900">${item.propietario}<p class="font-normal text-xs text-gray-500">${item.predio}</p></td>
+                            <td class="px-6 py-4 font-semibold ${colorClass}">${item.antiguedad}</td>
+                            <td class="px-6 py-4 text-right font-semibold text-red-600">${formatCurrency(item.monto)}</td>
+                            <td class="px-6 py-4 text-center"><button class="text-blue-600 hover:underline text-xs font-semibold">Enviar Recordatorio</button></td>
+                        </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            }
+            
+            function renderExpensesTable() {
+                const tableBody = document.getElementById('expensesTableBody');
+                const tableFoot = document.getElementById('expensesTableFoot');
+                tableBody.innerHTML = '';
+                let totalPresupuesto = 0;
+                let totalReal = 0;
+
+                reportData.expensesReport.categories.forEach(item => {
+                    const diferencia = item.presupuesto - item.real;
+                    let diffColor = 'text-gray-500';
+                    if (diferencia > 0) diffColor = 'text-green-600';
+                    if (diferencia < 0) diffColor = 'text-red-600';
+                    
+                    const row = `
+                        <tr class="border-b">
+                            <td class="px-6 py-3 font-medium">${item.categoria}</td>
+                            <td class="px-6 py-3 text-right">${formatCurrency(item.presupuesto)}</td>
+                            <td class="px-6 py-3 text-right">${formatCurrency(item.real)}</td>
+                            <td class="px-6 py-3 text-right ${diffColor}">${diferencia < 0 ? `(${formatCurrency(Math.abs(diferencia))})` : formatCurrency(diferencia)}</td>
+                        </tr>`;
+                    tableBody.innerHTML += row;
+                    totalPresupuesto += item.presupuesto;
+                    totalReal += item.real;
+                });
+
+                const totalDiferencia = totalPresupuesto - totalReal;
+                let totalDiffColor = 'text-gray-900';
+                if (totalDiferencia > 0) totalDiffColor = 'text-green-600';
+                if (totalDiferencia < 0) totalDiffColor = 'text-red-600';
+
+                tableFoot.innerHTML = `
+                    <tr class="border-t-2">
+                        <td class="px-6 py-3">Total</td>
+                        <td class="px-6 py-3 text-right">${formatCurrency(totalPresupuesto)}</td>
+                        <td class="px-6 py-3 text-right">${formatCurrency(totalReal)}</td>
+                        <td class="px-6 py-3 text-right ${totalDiffColor}">${totalDiferencia < 0 ? `(${formatCurrency(Math.abs(totalDiferencia))})` : formatCurrency(totalDiferencia)}</td>
+                    </tr>`;
+            }
+
+            function renderCharts() {
+                // --- GRÁFICO DE INGRESOS (INCOMECHART) ---
+                const incomeCtx = document.getElementById('incomeChart').getContext('2d');
+                const incomeChart = new Chart(incomeCtx, { type: 'bar', data: { labels: reportData.incomeReport.monthly.labels, datasets: [{ data: reportData.incomeReport.monthly.data, backgroundColor: 'rgba(59, 130, 246, 0.5)', borderColor: 'rgba(59, 130, 246, 1)', borderWidth: 2, borderRadius: 5 }] }, options: { responsive: true, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `Ingresos: ${formatCurrency(c.raw)}` } } }, scales: { y: { ticks: { callback: (v) => `S/${v/1000}k` } } } } });
+                
+                document.getElementById('btn-monthly').addEventListener('click', () => { incomeChart.data = { labels: reportData.incomeReport.monthly.labels, datasets: [{...incomeChart.data.datasets[0], data: reportData.incomeReport.monthly.data, backgroundColor: 'rgba(59, 130, 246, 0.5)', borderColor: 'rgba(59, 130, 246, 1)'}] }; incomeChart.update(); toggleActive(true); });
+                document.getElementById('btn-yearly').addEventListener('click', () => { incomeChart.data = { labels: reportData.incomeReport.yearly.labels, datasets: [{...incomeChart.data.datasets[0], data: reportData.incomeReport.yearly.data, backgroundColor: 'rgba(22, 163, 74, 0.5)', borderColor: 'rgba(22, 163, 74, 1)'}] }; incomeChart.update(); toggleActive(false); });
+                function toggleActive(isMonthly) {
+                    document.getElementById('btn-monthly').classList.toggle('bg-blue-600', isMonthly); document.getElementById('btn-monthly').classList.toggle('text-white', isMonthly); document.getElementById('btn-monthly').classList.toggle('bg-white', !isMonthly); document.getElementById('btn-monthly').classList.toggle('text-blue-600', !isMonthly);
+                    document.getElementById('btn-yearly').classList.toggle('bg-blue-600', !isMonthly); document.getElementById('btn-yearly').classList.toggle('text-white', !isMonthly); document.getElementById('btn-yearly').classList.toggle('bg-white', isMonthly); document.getElementById('btn-yearly').classList.toggle('text-blue-600', isMonthly);
+                }
+
+                // --- GRÁFICO DE ANTIGÜEDAD DE DEUDA (DELINQUENCYCHART) ---
+                const delinquencyCtx = document.getElementById('delinquencyChart').getContext('2d');
+                new Chart(delinquencyCtx, { type: 'bar', data: { labels: reportData.delinquencyChartData.labels, datasets: [{ label: 'Monto de Deuda', data: reportData.delinquencyChartData.data, backgroundColor: ['rgba(252, 211, 77, 0.6)', 'rgba(249, 115, 22, 0.6)', 'rgba(220, 38, 38, 0.6)'], borderColor: ['rgba(252, 211, 77, 1)', 'rgba(249, 115, 22, 1)', 'rgba(220, 38, 38, 1)'], borderWidth: 1 }] }, options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `Deuda: ${formatCurrency(c.raw)}` } } }, scales: { x: { ticks: { callback: (v) => `S/${v/1000}k` } } } } });
+
+                // --- GRÁFICO DE GASTOS (EXPENSESCHART) ---
+                const expensesCtx = document.getElementById('expensesChart').getContext('2d');
+                new Chart(expensesCtx, { type: 'doughnut', data: { labels: reportData.expensesReport.categories.map(c => c.categoria), datasets: [{ label: 'Distribución de Gastos', data: reportData.expensesReport.categories.map(c => c.real), backgroundColor: ['#3b82f6', '#10b981', '#f97316', '#8b5cf6', '#64748b'], hoverOffset: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' }, tooltip: { callbacks: { label: (c) => `${c.label}: ${formatCurrency(c.raw)}` } } } } });
+            }
+
+            // --- 3. INICIALIZACIÓN ---
+            renderKPIs();
+            renderDelinquencyTable();
+            renderExpensesTable();
+            renderCharts();
+        });
+    </script>
+</body>
+</html>

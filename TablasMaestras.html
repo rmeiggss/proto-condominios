@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablas Maestras - Sistema de Pagos</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos de Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .table-row:hover {
+            background-color: #f9fafb;
+        }
+        .modal-content {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Contenedor principal -->
+    <div class="container mx-auto p-4 md:p-8 max-w-6xl">
+
+        <!-- Cabecera -->
+        <header class="mb-8">
+            <a href="PortalAdministrador.html" class="text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1 mb-2">
+                <i class="ph ph-arrow-left"></i>
+                Volver al Menú de Gestión
+            </a>
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Administrar Tablas Maestras</h1>
+                    <p class="text-gray-600">Gestione los grupos de parámetros del sistema.</p>
+                </div>
+                <a href="Login.html" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 flex-shrink-0">
+                    <i class="ph ph-sign-out"></i>
+                    Cerrar Sesión
+                </a>
+            </div>
+        </header>
+
+        <div class="flex justify-end mb-4">
+             <button onclick="openGroupModal()" class="bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                <i class="ph ph-plus"></i>
+                <span>Añadir Nuevo Grupo</span>
+            </button>
+        </div>
+
+        <!-- Tabla Principal de Grupos -->
+        <main class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-600">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Nombre del Grupo</th>
+                            <th scope="col" class="px-6 py-3">N° de Parámetros</th>
+                            <th scope="col" class="px-6 py-3 text-center">Estado</th>
+                            <th scope="col" class="px-6 py-3 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="groupsTableBody">
+                        <!-- El contenido se generará con JS -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para Gestionar Parámetros de un Grupo -->
+    <div id="paramsModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-40">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl p-8 transform scale-95 modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="paramsModalTitle" class="text-2xl font-bold text-gray-900"></h2>
+                <button onclick="closeParamsModal()" class="text-gray-400 hover:text-gray-700"><i class="ph ph-x text-3xl"></i></button>
+            </div>
+            <div class="flex justify-end mb-4">
+                <button onclick="openParamModal()" class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 flex items-center gap-2"><i class="ph ph-plus"></i>Añadir Parámetro</button>
+            </div>
+            <div class="bg-gray-50 rounded-lg overflow-hidden">
+                <table class="w-full text-sm text-left text-gray-600">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-200">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">ID</th>
+                            <th scope="col" class="px-6 py-3">Código</th>
+                            <th scope="col" class="px-6 py-3">Valor</th>
+                            <th scope="col" class="px-6 py-3 text-center">Estado</th>
+                            <th scope="col" class="px-6 py-3 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paramsTableBodyInModal">
+                        <!-- Parámetros del grupo seleccionado -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Añadir/Editar Grupo -->
+    <div id="groupModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 transform scale-95 modal-content">
+            <h2 id="groupModalTitle" class="text-2xl font-bold text-gray-900 mb-6"></h2>
+            <form id="groupForm" class="space-y-4">
+                <input type="hidden" id="groupKeyInput">
+                <div>
+                    <label for="groupNameInput" class="block text-sm font-medium text-gray-700">Nombre del Grupo</label>
+                    <input type="text" id="groupNameInput" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Ej: Tipos de Concepto">
+                </div>
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" onclick="closeGroupModal()" class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal para Añadir/Editar Parámetro -->
+    <div id="paramModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 transform scale-95 modal-content">
+            <h2 id="paramModalTitle" class="text-2xl font-bold text-gray-900 mb-6"></h2>
+            <form id="paramForm" class="space-y-4">
+                <input type="hidden" id="paramId">
+                <div>
+                    <label for="paramCode" class="block text-sm font-medium text-gray-700">Código</label>
+                    <input type="text" id="paramCode" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Ej: ADMIN">
+                </div>
+                 <div>
+                    <label for="paramValue" class="block text-sm font-medium text-gray-700">Valor</label>
+                    <input type="text" id="paramValue" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Ej: Administrador">
+                </div>
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" onclick="closeParamModal()" class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- INICIO: Lógica de la Aplicación ---
+
+        // 1. DATOS DE EJEMPLO
+        let allParamsData = {
+            'ROL': { name: 'Roles', active: true, parameters: [{ id: 1, code: 'ADMIN', value: 'Administrador', active: true }, { id: 2, code: 'PROPIETARIO', value: 'Propietario', active: true }, { id: 3, code: 'JUNTA', value: 'Junta Directiva', active: true }] },
+            'METODO_PAGO': { name: 'Métodos de Pago', active: true, parameters: [{ id: 4, code: 'TRANSFERENCIA', value: 'Transferencia Bancaria', active: true }, { id: 5, code: 'YAPE_PLIN', value: 'YAPE o PLIN', active: true }, { id: 6, code: 'PASARELA', value: 'Pasarela de Pagos', active: true }, { id: 7, code: 'MANUAL', value: 'Pago Manual', active: false }] },
+            'ESTADO_PAGO': { name: 'Estados de Pago', active: true, parameters: [{ id: 8, code: 'PENDIENTE', value: 'Pendiente de Aprobación', active: true }, { id: 9, code: 'APROBADO', value: 'Aprobado', active: true }, { id: 10, code: 'RECHAZADO', value: 'Rechazado', active: true }] },
+            'TIPO_DOC': { name: 'Tipos de Documento', active: true, parameters: [{ id: 11, code: 'DNI', value: 'Documento Nacional de Identidad', active: true }, { id: 12, code: 'CEX', value: 'Carnet de Extranjería', active: true }, { id: 13, code: 'PAS', value: 'Pasaporte', active: true }] },
+            'CATEGORIA': { name: 'Categorías', active: true, parameters: [{ id: 14, code: 'SEGURIDAD', value: 'Seguridad', active: true }, { id: 15, code: 'MANTENIMIENTO', value: 'Mantenimiento', active: true }, { id: 16, code: 'SERVICIO', value: 'Servicio', active: true }] }
+        };
+
+        // 2. ESTADO DE LA APLICACIÓN
+        let currentState = {
+            activeGroupKey: null,
+            editingParamId: null,
+            editingGroupKey: null,
+        };
+
+        // 3. REFERENCIAS AL DOM
+        const groupsTableBody = document.getElementById('groupsTableBody');
+        const paramsModal = document.getElementById('paramsModal');
+        const paramsTableBodyInModal = document.getElementById('paramsTableBodyInModal');
+        const groupModal = document.getElementById('groupModal');
+        const paramModal = document.getElementById('paramModal');
+
+        // 4. FUNCIONES DE RENDERIZADO
+        function renderGroupsTable() {
+            groupsTableBody.innerHTML = '';
+            Object.entries(allParamsData).forEach(([key, group]) => {
+                const row = document.createElement('tr');
+                row.className = 'bg-white border-b table-row';
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-gray-900">${group.name}</td>
+                    <td class="px-6 py-4">${group.parameters.length}</td>
+                    <td class="px-6 py-4 text-center"><span class="px-2 py-1 font-semibold leading-tight rounded-full ${group.active ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'}">${group.active ? 'Activo' : 'Inactivo'}</span></td>
+                    <td class="px-6 py-4 text-center space-x-2 md:space-x-4">
+                        <button onclick="openParamsModal('${key}')" class="font-medium text-blue-600 hover:underline">Ver Parámetros</button>
+                        <button onclick="openGroupModal('${key}')" class="font-medium text-indigo-600 hover:underline">Editar</button>
+                        <button onclick="toggleGroupStatus('${key}')" class="font-medium ${group.active ? 'text-red-600 hover:underline' : 'text-green-600 hover:underline'}">${group.active ? 'Desactivar' : 'Activar'}</button>
+                    </td>`;
+                groupsTableBody.appendChild(row);
+            });
+        }
+
+        function renderParamsInModal() {
+            const group = allParamsData[currentState.activeGroupKey];
+            document.getElementById('paramsModalTitle').textContent = `Parámetros de: ${group.name}`;
+            paramsTableBodyInModal.innerHTML = '';
+            if (group.parameters.length === 0) {
+                 paramsTableBodyInModal.innerHTML = `<tr><td colspan="5" class="text-center text-gray-500 py-10">Este grupo no tiene parámetros.</td></tr>`;
+                 return;
+            }
+            group.parameters.forEach(param => {
+                const row = document.createElement('tr');
+                row.className = 'bg-white border-b';
+                row.innerHTML = `
+                    <td class="px-6 py-4">${param.id}</td>
+                    <td class="px-6 py-4 font-mono text-sm text-gray-500">${param.code}</td>
+                    <td class="px-6 py-4 font-medium text-gray-900">${param.value}</td>
+                    <td class="px-6 py-4 text-center"><span class="px-2 py-1 font-semibold leading-tight rounded-full ${param.active ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'}">${param.active ? 'Activo' : 'Inactivo'}</span></td>
+                    <td class="px-6 py-4 text-center space-x-4">
+                        <button onclick="openParamModal(${param.id})" class="font-medium text-blue-600 hover:underline">Editar</button>
+                        <button onclick="toggleParamStatus(${param.id})" class="font-medium ${param.active ? 'text-red-600 hover:underline' : 'text-green-600 hover:underline'}">${param.active ? 'Desactivar' : 'Activar'}</button>
+                    </td>`;
+                paramsTableBodyInModal.appendChild(row);
+            });
+        }
+
+        // 5. LÓGICA DE MODALES
+        function openParamsModal(groupKey) {
+            currentState.activeGroupKey = groupKey;
+            renderParamsInModal();
+            paramsModal.classList.remove('hidden');
+            setTimeout(() => paramsModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+        }
+        function closeParamsModal() {
+            paramsModal.querySelector('.modal-content').classList.add('scale-95');
+            setTimeout(() => paramsModal.classList.add('hidden'), 300);
+        }
+
+        function openGroupModal(key = null) {
+            document.getElementById('groupForm').reset();
+            if (key) {
+                currentState.editingGroupKey = key;
+                document.getElementById('groupModalTitle').textContent = 'Editar Grupo';
+                document.getElementById('groupKeyInput').value = key;
+                document.getElementById('groupNameInput').value = allParamsData[key].name;
+            } else {
+                currentState.editingGroupKey = null;
+                document.getElementById('groupModalTitle').textContent = 'Añadir Nuevo Grupo';
+            }
+            groupModal.classList.remove('hidden');
+            setTimeout(() => groupModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+        }
+        function closeGroupModal() {
+            groupModal.querySelector('.modal-content').classList.add('scale-95');
+            setTimeout(() => groupModal.classList.add('hidden'), 300);
+        }
+
+        function openParamModal(id = null) {
+            document.getElementById('paramForm').reset();
+            if (id) {
+                const param = allParamsData[currentState.activeGroupKey].parameters.find(p => p.id === id);
+                currentState.editingParamId = id;
+                document.getElementById('paramModalTitle').textContent = 'Editar Parámetro';
+                document.getElementById('paramId').value = id;
+                document.getElementById('paramCode').value = param.code;
+                document.getElementById('paramValue').value = param.value;
+            } else {
+                currentState.editingParamId = null;
+                document.getElementById('paramModalTitle').textContent = `Añadir Parámetro a ${allParamsData[currentState.activeGroupKey].name}`;
+            }
+            paramModal.classList.remove('hidden');
+            setTimeout(() => paramModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+        }
+        function closeParamModal() {
+            paramModal.querySelector('.modal-content').classList.add('scale-95');
+            setTimeout(() => paramModal.classList.add('hidden'), 300);
+        }
+
+        // 6. LÓGICA DE MANIPULACIÓN DE DATOS
+        document.getElementById('groupForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('groupNameInput').value.trim();
+            if (!name) return;
+            if (currentState.editingGroupKey) {
+                allParamsData[currentState.editingGroupKey].name = name;
+            } else {
+                const newKey = name.toUpperCase().replace(/\s+/g, '_');
+                if (allParamsData[newKey]) { alert(`El grupo con clave "${newKey}" ya existe.`); return; }
+                allParamsData[newKey] = { name, active: true, parameters: [] };
+            }
+            renderGroupsTable();
+            closeGroupModal();
+        });
+
+        document.getElementById('paramForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const code = document.getElementById('paramCode').value.toUpperCase().trim();
+            const value = document.getElementById('paramValue').value.trim();
+            if (!code || !value) return;
+
+            const groupParams = allParamsData[currentState.activeGroupKey].parameters;
+            if (currentState.editingParamId) {
+                const param = groupParams.find(p => p.id === currentState.editingParamId);
+                param.code = code;
+                param.value = value;
+            } else {
+                const newId = Math.max(0, ...Object.values(allParamsData).flatMap(g => g.parameters).map(p => p.id)) + 1;
+                groupParams.push({ id: newId, code, value, active: true });
+            }
+            renderParamsInModal();
+            renderGroupsTable(); // Actualizar contador de parámetros
+            closeParamModal();
+        });
+
+        function toggleGroupStatus(key) {
+            allParamsData[key].active = !allParamsData[key].active;
+            renderGroupsTable();
+        }
+
+        function toggleParamStatus(id) {
+            const param = allParamsData[currentState.activeGroupKey].parameters.find(p => p.id === id);
+            if(param) {
+                param.active = !param.active;
+                renderParamsInModal();
+            }
+        }
+
+        // 7. INICIALIZACIÓN
+        document.addEventListener('DOMContentLoaded', renderGroupsTable);
+    </script>
+</body>
+</html>

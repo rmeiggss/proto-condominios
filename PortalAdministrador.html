@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal del Administrador - Sistema de Pagos</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos de Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .menu-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Contenedor principal -->
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <!-- Cabecera -->
+        <header class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Panel de Administración</h1>
+                <p class="text-gray-600">Bienvenido, Usuario Administrador</p>
+            </div>
+            <a href="Login.html" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2">
+                <i class="ph ph-sign-out"></i>
+                Cerrar Sesión
+            </a>
+        </header>
+
+        <!-- Menú de Opciones del Administrador -->
+        <main>
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">Menú de Gestión</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                
+                <a href="RegistrarPropietario.html" class="menu-card bg-white p-6 rounded-xl shadow-md flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4"><i class="ph ph-user-plus text-3xl"></i></div>
+                    <h3 class="text-lg font-semibold text-gray-900">Registrar Propietario</h3>
+                    <p class="text-sm text-gray-500 mt-1">Crear nuevos propietarios y asignarles sus predios.</p>
+                </a>
+                <a href="GestionarUsuarios.html" class="menu-card bg-white p-6 rounded-xl shadow-md flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4"><i class="ph ph-users-three text-3xl"></i></div>
+                    <h3 class="text-lg font-semibold text-gray-900">Gestionar Usuarios</h3>
+                    <p class="text-sm text-gray-500 mt-1">Asignar roles de junta directiva y restablecer contraseñas.</p>
+                </a>
+                <a href="AprobarPagos.html" class="menu-card bg-white p-6 rounded-xl shadow-md flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mb-4"><i class="ph ph-money text-3xl"></i></div>
+                    <h3 class="text-lg font-semibold text-gray-900">Aprobar Pagos</h3>
+                    <p class="text-sm text-gray-500 mt-1">Revisar y validar los pagos reportados por los propietarios.</p>
+                </a>
+                <a href="Portal.html?role=admin" class="menu-card bg-white p-6 rounded-xl shadow-md flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-cyan-100 text-cyan-600 rounded-full flex items-center justify-center mb-4"><i class="ph ph-wallet text-3xl"></i></div>
+                    <h3 class="text-lg font-semibold text-gray-900">Realizar Pago</h3>
+                    <p class="text-sm text-gray-500 mt-1">Acceder al portal de propietario para pagar cuotas personales.</p>
+                </a>
+                <!-- NUEVA OPCIÓN: GESTIONAR CONCEPTOS -->
+                <a href="GestionarConceptos.html" class="menu-card bg-white p-6 rounded-xl shadow-md flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mb-4"><i class="ph ph-tag-simple text-3xl"></i></div>
+                    <h3 class="text-lg font-semibold text-gray-900">Gestionar Conceptos</h3>
+                    <p class="text-sm text-gray-500 mt-1">Crear y editar los conceptos de pago para los residentes.</p>
+                </a>
+                <a href="RegistrarGasto.html" class="menu-card bg-white p-6 rounded-xl shadow-md flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mb-4"><i class="ph ph-receipt text-3xl"></i></div>
+                    <h3 class="text-lg font-semibold text-gray-900">Registrar Gasto</h3>
+                    <p class="text-sm text-gray-500 mt-1">Añadir nuevos gastos y subir las evidencias correspondientes.</p>
+                </a>
+                <a href="TablasMaestras.html" class="menu-card bg-white p-6 rounded-xl shadow-md flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-4"><i class="ph ph-table text-3xl"></i></div>
+                    <h3 class="text-lg font-semibold text-gray-900">Tablas Maestras</h3>
+                    <p class="text-sm text-gray-500 mt-1">Administrar parámetros del sistema como roles, estados, etc.</p>
+                </a>
+                <a href="EnviarComunicados.html" class="menu-card bg-white p-6 rounded-xl shadow-md flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center mb-4"><i class="ph ph-megaphone-simple text-3xl"></i></div>
+                    <h3 class="text-lg font-semibold text-gray-900">Enviar Comunicados</h3>
+                    <p class="text-sm text-gray-500 mt-1">Publicar anuncios y noticias para todos los residentes.</p>
+                </a>
+                <a href="VerReportes.html" class="menu-card bg-white p-6 rounded-xl shadow-md flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-4"><i class="ph ph-chart-bar text-3xl"></i></div>
+                    <h3 class="text-lg font-semibold text-gray-900">Ver Reportes</h3>
+                    <p class="text-sm text-gray-500 mt-1">Consultar reportes de morosidad y estado de cuentas.</p>
+                </a>
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enviar Comunicados - Sistema de Pagos</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos de Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Estilos para el editor Quill */
+        .ql-toolbar {
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+            border-color: #d1d5db;
+        }
+        .ql-container {
+            border-bottom-left-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+            border-color: #d1d5db;
+            min-height: 200px;
+            font-size: 1rem;
+        }
+        .history-item:hover {
+             background-color: #f9fafb;
+        }
+        /* Para que el historial renderice bien el contenido de Quill */
+        .ql-editor {
+            padding: 0;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Contenedor principal -->
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+
+        <!-- Cabecera -->
+        <header class="mb-8">
+            <a href="PortalAdministrador.html" class="text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1 mb-2">
+                <i class="ph ph-arrow-left"></i>
+                Volver al Menú de Gestión
+            </a>
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Enviar Comunicados</h1>
+                    <p class="text-gray-600">Redacte y envíe anuncios a todos los residentes.</p>
+                </div>
+                <a href="Login.html" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 flex-shrink-0">
+                    <i class="ph ph-sign-out"></i>
+                    Cerrar Sesión
+                </a>
+            </div>
+        </header>
+
+        <!-- Formulario para Nuevo Comunicado -->
+        <div class="bg-white p-8 rounded-xl shadow-md mb-8">
+            <form id="comunicadoForm" class="space-y-6">
+                <div>
+                    <label for="titulo" class="block text-sm font-medium text-gray-700">Título del Comunicado</label>
+                    <input type="text" id="titulo" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Mensaje</label>
+                    <!-- Contenedor para el editor Quill -->
+                    <div id="editor" class="mt-1"></div>
+                </div>
+                
+                <!-- INICIO: Selección de Canales -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Canales de Envío</label>
+                    <div class="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <label for="channel_portal" class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500">
+                            <input type="checkbox" id="channel_portal" name="channels" value="portal" class="h-5 w-5 rounded text-blue-600 focus:ring-blue-500" checked>
+                            <span class="ml-3 font-medium text-gray-700">Portal Web</span>
+                            <i class="ph-fill ph-globe-simple ml-auto text-xl text-gray-400"></i>
+                        </label>
+                        <label for="channel_email" class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500">
+                            <input type="checkbox" id="channel_email" name="channels" value="email" class="h-5 w-5 rounded text-blue-600 focus:ring-blue-500" checked>
+                            <span class="ml-3 font-medium text-gray-700">Correo</span>
+                            <i class="ph-fill ph-envelope-simple ml-auto text-xl text-gray-400"></i>
+                        </label>
+                        <label for="channel_whatsapp" class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 has-[:checked]:bg-green-50 has-[:checked]:border-green-500">
+                            <input type="checkbox" id="channel_whatsapp" name="channels" value="whatsapp" class="h-5 w-5 rounded text-green-600 focus:ring-green-500">
+                            <span class="ml-3 font-medium text-gray-700">WhatsApp</span>
+                            <i class="ph-fill ph-whatsapp-logo ml-auto text-xl text-green-500"></i>
+                        </label>
+                    </div>
+                </div>
+                <!-- FIN: Selección de Canales -->
+
+                <div>
+                    <label for="attachment" class="block text-sm font-medium text-gray-700">Adjuntar Archivo (Opcional)</label>
+                    <input type="file" id="attachment" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 flex items-center gap-2">
+                        <i class="ph ph-paper-plane-tilt"></i>
+                        Enviar Comunicado
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Historial de Comunicados -->
+        <main>
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Historial de Comunicados</h2>
+            <div id="historyContainer" class="space-y-4">
+                <!-- El historial se generará con JS -->
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal de Confirmación de Envío -->
+    <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform scale-95 modal-content">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="ph ph-paper-plane-tilt text-5xl text-blue-500"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">Confirmar Envío</h2>
+            <p id="confirmMessage" class="text-gray-600 mt-2 mb-6"></p>
+            <div class="flex justify-center gap-4">
+                <button onclick="closeConfirmModal()" class="w-full bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold">Cancelar</button>
+                <button onclick="sendComunicado()" class="w-full bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold">Sí, Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. INICIALIZACIÓN DEL EDITOR QUILL
+        const quill = new Quill('#editor', {
+            theme: 'snow',
+            modules: { toolbar: [[{ 'header': [1, 2, false] }], ['bold', 'italic', 'underline'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['clean']] },
+            placeholder: 'Escriba aquí el cuerpo del mensaje...'
+        });
+
+        // 2. DATOS DE EJEMPLO
+        let history = [
+            { title: 'Recordatorio de Pago de Mantenimiento', date: '15 de Julio, 2025', sender: 'Administración', contentHTML: 'Estimados residentes, les recordamos que la fecha límite para el pago del mantenimiento del mes de julio es el día 31. Agradecemos su puntualidad.', channels: ['portal', 'email'] },
+            { title: 'Corte de Agua Programado', date: '10 de Julio, 2025', sender: 'Junta Directiva', contentHTML: '<p>Se informa que el día <strong>12 de julio</strong> se realizará un corte en el suministro de agua de <strong>9:00 a.m. a 1:00 p.m.</strong> por trabajos de mantenimiento. Tomen sus precauciones.</p>', channels: ['portal', 'email', 'whatsapp'] },
+        ];
+
+        // 3. REFERENCIAS AL DOM
+        const form = document.getElementById('comunicadoForm');
+        const historyContainer = document.getElementById('historyContainer');
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmMessage = document.getElementById('confirmMessage');
+
+        // 4. FUNCIONES DE RENDERIZADO
+        function renderHistory() {
+            historyContainer.innerHTML = '';
+            history.forEach(item => {
+                const channelsHTML = item.channels.map(channel => {
+                    if (channel === 'portal') return `<i class="ph-fill ph-globe-simple text-gray-500" title="Portal Web"></i>`;
+                    if (channel === 'email') return `<i class="ph-fill ph-envelope-simple text-gray-500" title="Correo Electrónico"></i>`;
+                    if (channel === 'whatsapp') return `<i class="ph-fill ph-whatsapp-logo text-green-500" title="WhatsApp"></i>`;
+                    return '';
+                }).join('');
+
+                const historyElement = document.createElement('div');
+                historyElement.className = 'bg-white p-4 rounded-xl shadow-md border history-item';
+                historyElement.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-bold text-gray-800">${item.title}</p>
+                            <p class="text-sm text-gray-500 mb-2">Enviado el ${item.date} por ${item.sender}</p>
+                        </div>
+                        <div class="flex items-center gap-2 text-xl">${channelsHTML}</div>
+                    </div>
+                    <div class="text-gray-700 text-sm ql-snow"><div class="ql-editor">${item.contentHTML}</div></div>
+                `;
+                historyContainer.appendChild(historyElement);
+            });
+        }
+
+        // 5. LÓGICA DE MODALES Y FORMULARIO
+        function openConfirmModal() {
+            const selectedChannels = Array.from(document.querySelectorAll('input[name="channels"]:checked')).map(cb => {
+                const label = cb.closest('label').querySelector('span').textContent;
+                return `<strong>${label}</strong>`;
+            });
+
+            if (selectedChannels.length === 0) {
+                alert('Debe seleccionar al menos un canal de envío.');
+                return;
+            }
+
+            confirmMessage.innerHTML = `¿Está seguro que desea enviar este comunicado a través de ${selectedChannels.join(', ')}?`;
+            confirmModal.classList.remove('hidden');
+            setTimeout(() => confirmModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+        }
+
+        function closeConfirmModal() {
+            confirmModal.querySelector('.modal-content').classList.add('scale-95');
+            setTimeout(() => confirmModal.classList.add('hidden'), 300);
+        }
+        
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('titulo').value;
+            if (!title || quill.getLength() <= 1) { // quill.getLength() es 1 si está vacío
+                alert('El título y el mensaje no pueden estar vacíos.');
+                return;
+            }
+            openConfirmModal();
+        });
+
+        function sendComunicado() {
+            const title = document.getElementById('titulo').value;
+            const contentHTML = quill.root.innerHTML; // Guardar el HTML para mantener el formato
+            const date = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+            const channels = Array.from(document.querySelectorAll('input[name="channels"]:checked')).map(cb => cb.value);
+
+            history.unshift({ title, contentHTML, date, sender: 'Administración', channels });
+            renderHistory();
+
+            form.reset();
+            quill.setContents([]); // Limpiar el editor Quill
+            document.querySelectorAll('input[name="channels"]').forEach(cb => {
+                cb.checked = cb.value === 'portal' || cb.value === 'email'; // Resetear a default
+            });
+
+            closeConfirmModal();
+        }
+
+        // 6. INICIALIZACIÓN
+        document.addEventListener('DOMContentLoaded', renderHistory);
+    </script>
+</body>
+</html>

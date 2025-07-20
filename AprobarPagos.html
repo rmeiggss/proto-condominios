@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprobar Pagos - Sistema de Pagos</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos de Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .tab-button.active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .pagination-button {
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .pagination-button.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        .pagination-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .details-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .details-container.open {
+            max-height: 1000px; /* Un valor suficientemente grande */
+        }
+        .chevron-icon {
+            transition: transform 0.3s ease-in-out;
+        }
+        .chevron-icon.open {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Contenedor principal -->
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <!-- Cabecera -->
+        <header class="mb-8">
+            <a href="PortalAdministrador.html" class="text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1 mb-2">
+                <i class="ph ph-arrow-left"></i>
+                Volver al Menú de Gestión
+            </a>
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Aprobación de Pagos</h1>
+                    <p class="text-gray-600">Revise los pagos reportados por los propietarios.</p>
+                </div>
+                <a href="Login.html" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 flex-shrink-0">
+                    <i class="ph ph-sign-out"></i>
+                    Cerrar Sesión
+                </a>
+            </div>
+        </header>
+
+        <!-- Pestañas de Navegación -->
+        <div class="mb-6 border-b border-gray-200">
+            <nav id="tabsContainer" class="flex -mb-px space-x-6" aria-label="Tabs">
+                <button data-status="pending" class="tab-button active whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
+                    Pendientes
+                </button>
+                <button data-status="approved" class="tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
+                    Aprobados
+                </button>
+                <button data-status="rejected" class="tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
+                    Rechazados
+                </button>
+            </nav>
+        </div>
+
+        <!-- Lista de Pagos (se llenará dinámicamente) -->
+        <main id="paymentsList" class="space-y-4 min-h-[400px]">
+            <!-- El contenido se generará con JS -->
+        </main>
+        
+        <!-- Controles de Paginación (se llenará dinámicamente) -->
+        <nav id="paginationControls" class="mt-8 flex items-center justify-between" aria-label="Pagination">
+            <!-- El contenido se generará con JS -->
+        </nav>
+    </div>
+
+    <!-- Modal para ver Comprobante -->
+    <div id="voucherModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white p-4 rounded-lg max-w-lg w-full relative">
+            <button onclick="cerrarModalComprobante()" class="absolute -top-4 -right-4 bg-white text-black rounded-full w-10 h-10 flex items-center justify-center text-2xl">&times;</button>
+            <img id="voucherImage" src="" alt="Comprobante de pago" class="w-full h-auto rounded-md">
+        </div>
+    </div>
+    
+    <script>
+        // --- INICIO: Lógica de la Aplicación ---
+
+        // 1. DATOS DE EJEMPLO
+        let allPayments = [];
+        const names = ["Juan", "Maria", "Carlos", "Ana", "Luis", "Elena", "Pedro", "Sofia"];
+        const lastNames = ["Pérez", "Rodriguez", "Gomez", "Lopez", "Martinez", "Sanchez", "Vargas", "Diaz"];
+        const concepts = ["Mantenimiento", "Cuota Extra", "Alquiler de Salón", "Multa por Ruidos", "Reserva de Parrilla"];
+        const methods = ["Transferencia", "YAPE", "PLIN", "Manual"];
+        const statuses = ["pending", "approved", "rejected"];
+
+        for (let i = 1; i <= 40; i++) {
+            const statusIndex = i <= 2 ? 0 : (i <= 35 ? 1 : 2); // 2 pendientes, 33 aprobados, 5 rechazados
+            allPayments.push({
+                id: i,
+                propietario: `${names[i % names.length]} ${lastNames[i % lastNames.length]}`,
+                predio: `Torre ${String.fromCharCode(65 + (i % 3))}, Dpto. ${100 + (i % 10)}`, // Agrupar por predio
+                concepto: `${concepts[i % concepts.length]} - ${new Date(2025, i % 12, 1).toLocaleString('es-ES', { month: 'long' })}`,
+                monto: (Math.random() * 200 + 100).toFixed(2),
+                metodo: methods[i % methods.length],
+                status: statuses[statusIndex],
+                comprobanteUrl: `https://placehold.co/600x800/${Math.floor(Math.random()*16777215).toString(16)}/ffffff?text=Voucher+${i}`
+            });
+        }
+
+        // 2. ESTADO DE LA APLICACIÓN
+        let currentState = {
+            status: 'pending',
+            currentPage: 1,
+            itemsPerPage: 10
+        };
+
+        // 3. REFERENCIAS AL DOM
+        const paymentsListContainer = document.getElementById('paymentsList');
+        const paginationControlsContainer = document.getElementById('paginationControls');
+        const tabsContainer = document.getElementById('tabsContainer');
+
+        // 4. FUNCIONES DE RENDERIZADO
+        function renderPendingPayments(paymentsToRender) {
+             paymentsToRender.forEach(payment => {
+                const paymentElement = document.createElement('div');
+                paymentElement.className = 'bg-white p-4 rounded-xl shadow-md border border-transparent hover:border-blue-500 transition';
+                paymentElement.dataset.paymentId = payment.id;
+                paymentElement.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-8 gap-4 items-center">
+                        <div class="md:col-span-4">
+                            <p class="font-bold text-gray-800">${payment.propietario} <span class="font-normal text-gray-500">- ${payment.predio}</span></p>
+                            <p class="text-sm text-gray-600">${payment.concepto}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Monto</p>
+                            <p class="font-semibold text-gray-800">S/ ${payment.monto}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Método</p>
+                            <p class="font-semibold text-gray-800">${payment.metodo}</p>
+                        </div>
+                        <div class="md:col-span-2 flex flex-col sm:flex-row items-stretch md:items-center gap-2">
+                            <button onclick="abrirModalComprobante('${payment.comprobanteUrl}')" class="flex-1 text-center text-sm bg-gray-200 text-gray-800 px-3 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-colors">Ver Comprobante</button>
+                            <button onclick="processPayment(${payment.id}, 'approved')" class="flex-1 text-center text-sm bg-green-500 text-white px-3 py-2 rounded-lg font-semibold hover:bg-green-600 transition-colors">Aprobar</button>
+                            <button onclick="processPayment(${payment.id}, 'rejected')" class="flex-1 text-center text-sm bg-red-500 text-white px-3 py-2 rounded-lg font-semibold hover:bg-red-600 transition-colors">Rechazar</button>
+                        </div>
+                    </div>
+                `;
+                paymentsListContainer.appendChild(paymentElement);
+            });
+        }
+
+        function renderGroupedPayments(groupedData) {
+            Object.entries(groupedData).forEach(([predio, data]) => {
+                const groupContainer = document.createElement('div');
+                groupContainer.className = 'bg-white rounded-xl shadow-md';
+                
+                const headerHTML = `
+                    <div class="group-header p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50 rounded-xl">
+                        <div>
+                            <p class="font-bold text-gray-800">${data.propietario}</p>
+                            <p class="text-sm text-gray-500">${predio}</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1 rounded-full">${data.payments.length} pagos</span>
+                            <i class="ph ph-caret-down text-2xl text-gray-500 chevron-icon"></i>
+                        </div>
+                    </div>
+                `;
+
+                const detailsHTML = data.payments.map(payment => `
+                    <div class="grid grid-cols-5 gap-4 items-center px-4 py-3 border-t border-gray-100">
+                        <div class="col-span-2">
+                            <p class="font-medium text-gray-700">${payment.concepto}</p>
+                        </div>
+                        <div>
+                             <p class="text-sm text-gray-500">Monto</p>
+                             <p class="font-semibold text-gray-800">S/ ${payment.monto}</p>
+                        </div>
+                         <div>
+                             <p class="text-sm text-gray-500">Método</p>
+                             <p class="font-semibold text-gray-800">${payment.metodo}</p>
+                        </div>
+                        <div class="text-right">
+                             <button onclick="abrirModalComprobante('${payment.comprobanteUrl}')" class="text-sm text-blue-600 hover:underline">Ver Comprobante</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                groupContainer.innerHTML = `
+                    ${headerHTML}
+                    <div class="details-container">
+                        ${detailsHTML}
+                    </div>
+                `;
+                paymentsListContainer.appendChild(groupContainer);
+            });
+        }
+
+        function renderView(data, totalItems) {
+            paymentsListContainer.innerHTML = '';
+            if (totalItems === 0) {
+                paymentsListContainer.innerHTML = `<div class="text-center text-gray-500 py-10">No hay pagos en esta categoría.</div>`;
+                paginationControlsContainer.innerHTML = '';
+                return;
+            }
+
+            if (currentState.status === 'pending') {
+                renderPendingPayments(data);
+            } else {
+                renderGroupedPayments(data);
+            }
+            renderPaginationControls(totalItems);
+        }
+
+        function renderPaginationControls(totalItems) {
+            paginationControlsContainer.innerHTML = '';
+            const totalPages = Math.ceil(totalItems / currentState.itemsPerPage);
+            if (totalPages <= 1) return;
+
+            let paginationHTML = `
+                <div><p class="text-sm text-gray-700">Mostrando <span class="font-medium">${(currentState.currentPage - 1) * currentState.itemsPerPage + 1}</span> a <span class="font-medium">${Math.min(currentState.currentPage * currentState.itemsPerPage, totalItems)}</span> de <span class="font-medium">${totalItems}</span> resultados</p></div>
+                <div><nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"><button onclick="changePage(${currentState.currentPage - 1})" ${currentState.currentPage === 1 ? 'disabled' : ''} class="pagination-button relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">Anterior</button>`;
+            for (let i = 1; i <= totalPages; i++) {
+                paginationHTML += `<button onclick="changePage(${i})" class="pagination-button ${i === currentState.currentPage ? 'active' : ''} relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">${i}</button>`;
+            }
+            paginationHTML += `<button onclick="changePage(${currentState.currentPage + 1})" ${currentState.currentPage === totalPages ? 'disabled' : ''} class="pagination-button relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">Siguiente</button></nav></div>`;
+            paginationControlsContainer.innerHTML = paginationHTML;
+        }
+
+        function updateView() {
+            const filteredPayments = allPayments.filter(p => p.status === currentState.status);
+
+            if (currentState.status === 'pending') {
+                const paginatedPayments = filteredPayments.slice((currentState.currentPage - 1) * currentState.itemsPerPage, currentState.currentPage * currentState.itemsPerPage);
+                renderView(paginatedPayments, filteredPayments.length);
+            } else {
+                const groupedByPredio = filteredPayments.reduce((acc, payment) => {
+                    if (!acc[payment.predio]) {
+                        acc[payment.predio] = { propietario: payment.propietario, payments: [] };
+                    }
+                    acc[payment.predio].payments.push(payment);
+                    return acc;
+                }, {});
+                const paginatedGroups = Object.entries(groupedByPredio).slice((currentState.currentPage - 1) * currentState.itemsPerPage, currentState.currentPage * currentState.itemsPerPage);
+                renderView(Object.fromEntries(paginatedGroups), Object.keys(groupedByPredio).length);
+            }
+        }
+
+        // 5. MANEJADORES DE EVENTOS
+        tabsContainer.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (button) {
+                const status = button.dataset.status;
+                if (status) {
+                    currentState.status = status;
+                    currentState.currentPage = 1;
+                    tabsContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    updateView();
+                }
+            }
+        });
+
+        paymentsListContainer.addEventListener('click', (e) => {
+            const header = e.target.closest('.group-header');
+            if (header) {
+                const details = header.nextElementSibling;
+                const icon = header.querySelector('.chevron-icon');
+                details.classList.toggle('open');
+                icon.classList.toggle('open');
+            }
+        });
+
+        function changePage(page) {
+            const filtered = (currentState.status === 'pending') 
+                ? allPayments.filter(p => p.status === currentState.status)
+                : Object.keys(allPayments.filter(p => p.status === currentState.status).reduce((acc, p) => ({...acc, [p.predio]: true}), {}));
+            
+            const totalPages = Math.ceil(filtered.length / currentState.itemsPerPage);
+            if (page < 1 || page > totalPages) return;
+            currentState.currentPage = page;
+            updateView();
+        }
+        
+        function processPayment(paymentId, newStatus) {
+            const payment = allPayments.find(p => p.id === paymentId);
+            if (payment) {
+                payment.status = newStatus;
+                updateView();
+            }
+        }
+
+        // 6. INICIALIZACIÓN
+        document.addEventListener('DOMContentLoaded', updateView);
+
+        // --- Lógica de Modales ---
+        const voucherModal = document.getElementById('voucherModal');
+        const voucherImage = document.getElementById('voucherImage');
+        
+        function abrirModalComprobante(imgSrc) {
+            voucherImage.src = imgSrc;
+            voucherModal.classList.remove('hidden');
+        }
+
+        function cerrarModalComprobante() {
+            voucherModal.classList.add('hidden');
+            voucherImage.src = "";
+        }
+        
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !voucherModal.classList.contains('hidden')) {
+                cerrarModalComprobante();
+            }
+        });
+    </script>
+</body>
+</html>

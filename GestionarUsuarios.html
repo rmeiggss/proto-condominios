@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Usuarios - Sistema de Pagos</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos de Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .table-row:hover {
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Contenedor principal -->
+    <div class="container mx-auto p-4 md:p-8 max-w-6xl">
+
+        <!-- Cabecera -->
+        <header class="mb-8">
+            <a href="PortalAdministrador.html" class="text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1 mb-2">
+                <i class="ph ph-arrow-left"></i>
+                Volver al Menú de Gestión
+            </a>
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Gestionar Usuarios</h1>
+                    <p class="text-gray-600">Asigne roles y administre el acceso de los propietarios.</p>
+                </div>
+                <a href="Login.html" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 flex-shrink-0">
+                    <i class="ph ph-sign-out"></i>
+                    Cerrar Sesión
+                </a>
+            </div>
+        </header>
+
+        <!-- Filtros y Búsqueda -->
+        <div class="mb-6 flex flex-col md:flex-row gap-4">
+            <div class="relative flex-grow">
+                <!-- Se añade un ID al input para controlarlo con JS -->
+                <input type="text" id="searchInput" placeholder="Buscar por nombre, DNI o departamento..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            </div>
+            <a href="RegistrarPropietario.html" class="bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                <i class="ph ph-user-plus"></i>
+                <span>Nuevo Propietario</span>
+            </a>
+        </div>
+
+        <!-- Tabla de Usuarios -->
+        <main class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-600">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Nombre Completo</th>
+                            <th scope="col" class="px-6 py-3">Predio</th>
+                            <th scope="col" class="px-6 py-3">Usuario / DNI</th>
+                            <th scope="col" class="px-6 py-3">Rol</th>
+                            <th scope="col" class="px-6 py-3 text-center">Estado</th>
+                            <th scope="col" class="px-6 py-3 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <!-- Se añade un ID al tbody para manipular las filas -->
+                    <tbody id="userTableBody">
+                        <!-- Fila de Usuario 1 -->
+                        <tr class="bg-white border-b table-row">
+                            <td class="px-6 py-4 font-medium text-gray-900">Juan Pérez Gonzales</td>
+                            <td class="px-6 py-4">Torre A, Dpto. 502</td>
+                            <td class="px-6 py-4">45678901</td>
+                            <td class="px-6 py-4">
+                                <select class="border border-gray-300 rounded-md p-1 focus:ring-blue-500 focus:border-blue-500">
+                                    <option>Propietario</option>
+                                    <option selected>Junta Directiva</option>
+                                    <option>Administrador</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full">Activo</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <button onclick="abrirModalResetear('Juan Pérez Gonzales')" class="font-medium text-blue-600 hover:underline">Restablecer Acceso</button>
+                            </td>
+                        </tr>
+                        <!-- Fila de Usuario 2 -->
+                        <tr class="bg-white border-b table-row">
+                            <td class="px-6 py-4 font-medium text-gray-900">Maria Rodriguez López</td>
+                            <td class="px-6 py-4">Torre B, Dpto. 101</td>
+                            <td class="px-6 py-4">87654321</td>
+                            <td class="px-6 py-4">
+                                <select class="border border-gray-300 rounded-md p-1 focus:ring-blue-500 focus:border-blue-500">
+                                    <option selected>Propietario</option>
+                                    <option>Junta Directiva</option>
+                                    <option>Administrador</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full">Activo</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <button onclick="abrirModalResetear('Maria Rodriguez López')" class="font-medium text-blue-600 hover:underline">Restablecer Acceso</button>
+                            </td>
+                        </tr>
+                        <!-- Fila de Usuario 3 -->
+                        <tr class="bg-white border-b table-row">
+                            <td class="px-6 py-4 font-medium text-gray-900">Carlos Sanchez Vargas</td>
+                            <td class="px-6 py-4">Torre A, Dpto. 304</td>
+                            <td class="px-6 py-4">12345678</td>
+                            <td class="px-6 py-4">
+                                <select class="border border-gray-300 rounded-md p-1 focus:ring-blue-500 focus:border-blue-500">
+                                    <option selected>Propietario</option>
+                                    <option>Junta Directiva</option>
+                                    <option>Administrador</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="px-2 py-1 font-semibold leading-tight text-red-700 bg-red-100 rounded-full">Inactivo</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <button onclick="abrirModalResetear('Carlos Sanchez Vargas')" class="font-medium text-blue-600 hover:underline">Restablecer Acceso</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Confirmación para Restablecer Contraseña -->
+    <div id="resetModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform scale-95">
+            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="ph ph-key text-5xl text-yellow-500"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">Restablecer Acceso</h2>
+            <p class="text-gray-600 mt-2 mb-6">¿Confirma que desea restablecer la contraseña del usuario <strong id="userNameToReset"></strong>? Se enviará una nueva contraseña a su correo.</p>
+            <div class="flex justify-center gap-4">
+                <button onclick="cerrarModalResetear()" class="w-full bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                    Cancelar
+                </button>
+                <button onclick="confirmarReseteo()" class="w-full bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Éxito -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform scale-95">
+             <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="ph ph-check-circle text-5xl text-green-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">¡Éxito!</h2>
+            <p class="text-gray-600 mt-2 mb-6">La contraseña ha sido restablecida y enviada al correo del usuario.</p>
+            <button onclick="cerrarModalExito()" class="w-full bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const resetModal = document.getElementById('resetModal');
+        const successModal = document.getElementById('successModal');
+        const userNameToReset = document.getElementById('userNameToReset');
+
+        function abrirModalResetear(userName) {
+            userNameToReset.textContent = userName;
+            resetModal.classList.remove('hidden');
+            setTimeout(() => resetModal.querySelector('.transform').classList.remove('scale-95'), 10);
+        }
+
+        function cerrarModalResetear() {
+            const modalContent = resetModal.querySelector('.transform');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => resetModal.classList.add('hidden'), 300);
+        }
+        
+        function cerrarModalExito() {
+            const modalContent = successModal.querySelector('.transform');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => successModal.classList.add('hidden'), 300);
+        }
+
+        function confirmarReseteo() {
+            cerrarModalResetear();
+            // Simular una pequeña demora de la API
+            setTimeout(() => {
+                successModal.classList.remove('hidden');
+                setTimeout(() => successModal.querySelector('.transform').classList.remove('scale-95'), 10);
+            }, 400);
+        }
+
+        // Cerrar modales con la tecla Escape
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (!resetModal.classList.contains('hidden')) {
+                    cerrarModalResetear();
+                }
+                if (!successModal.classList.contains('hidden')) {
+                    cerrarModalExito();
+                }
+            }
+        });
+
+        // --- INICIO: Lógica de Búsqueda en la Tabla ---
+        const searchInput = document.getElementById('searchInput');
+        const userTableBody = document.getElementById('userTableBody');
+        const tableRows = userTableBody.getElementsByTagName('tr');
+
+        searchInput.addEventListener('keyup', function() {
+            const filter = searchInput.value.toLowerCase();
+
+            for (let i = 0; i < tableRows.length; i++) {
+                const cells = tableRows[i].getElementsByTagName('td');
+                // Celdas en las que se buscará: Nombre (0), Predio (1), Usuario/DNI (2)
+                const nameCell = cells[0];
+                const propertyCell = cells[1];
+                const userDniCell = cells[2];
+
+                if (nameCell && propertyCell && userDniCell) {
+                    const rowText = (nameCell.textContent || nameCell.innerText) + 
+                                  (propertyCell.textContent || propertyCell.innerText) + 
+                                  (userDniCell.textContent || userDniCell.innerText);
+
+                    if (rowText.toLowerCase().indexOf(filter) > -1) {
+                        tableRows[i].style.display = "";
+                    } else {
+                        tableRows[i].style.display = "none";
+                    }
+                }
+            }
+        });
+        // --- FIN: Lógica de Búsqueda en la Tabla ---
+    </script>
+
+</body>
+</html>

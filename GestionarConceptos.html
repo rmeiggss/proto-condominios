@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Conceptos de Pago - Sistema de Pagos</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos de Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Contenedor principal -->
+    <div class="container mx-auto p-4 md:p-8 max-w-6xl">
+
+        <!-- Cabecera -->
+        <header class="mb-8">
+            <a href="PortalAdministrador.html" class="text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1 mb-2">
+                <i class="ph ph-arrow-left"></i>
+                Volver al Menú de Gestión
+            </a>
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Gestionar Conceptos de Pago</h1>
+                    <p class="text-gray-600">Cree y administre los tipos de cobros para los residentes.</p>
+                </div>
+                <button onclick="openModal()" class="bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                    <i class="ph ph-plus"></i>
+                    <span>Añadir Concepto</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Tabla de Conceptos -->
+        <main class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-600">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Nombre del Concepto</th>
+                            <th scope="col" class="px-6 py-3">Categoría</th>
+                            <th scope="col" class="px-6 py-3 text-right">Monto Fijo</th>
+                            <th scope="col" class="px-6 py-3">Tipo</th>
+                            <th scope="col" class="px-6 py-3 text-center">Estado</th>
+                            <th scope="col" class="px-6 py-3 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="conceptsTableBody">
+                        <!-- Filas generadas por JS -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para Añadir/Editar Concepto -->
+    <div id="conceptModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 transform scale-95 transition-transform">
+            <h2 id="modalTitle" class="text-2xl font-bold text-gray-900 mb-6"></h2>
+            <form id="conceptForm" class="space-y-4">
+                <input type="hidden" id="conceptId">
+                <div>
+                    <label for="conceptName" class="block text-sm font-medium text-gray-700">Nombre del Concepto</label>
+                    <input type="text" id="conceptName" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Ej: Mantenimiento Mensual">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="conceptCategory" class="block text-sm font-medium text-gray-700">Categoría</label>
+                        <select id="conceptCategory" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></select>
+                    </div>
+                    <div>
+                        <label for="conceptType" class="block text-sm font-medium text-gray-700">Tipo</label>
+                        <select id="conceptType" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                            <option value="Obligatorio">Obligatorio</option>
+                            <option value="Opcional">Opcional</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label for="conceptAmount" class="block text-sm font-medium text-gray-700">Monto Fijo (S/)</label>
+                    <input type="number" id="conceptAmount" step="0.01" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="0.00">
+                </div>
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" onclick="closeModal()" class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- DATOS DE EJEMPLO ---
+            const conceptCategories = ['Mantenimiento', 'Cuotas Extraordinarias', 'Alquileres', 'Multas', 'Servicios'];
+            let concepts = [
+                { id: 1, name: 'Mantenimiento Mensual', category: 'Mantenimiento', amount: 180.00, type: 'Obligatorio', active: true },
+                { id: 2, name: 'Cuota Extraordinaria - Pintado Fachada', category: 'Cuotas Extraordinarias', amount: 250.00, type: 'Obligatorio', active: true },
+                { id: 3, name: 'Alquiler Salón de Usos Múltiples', category: 'Alquileres', amount: 150.00, type: 'Opcional', active: true },
+                { id: 4, name: 'Multa por Ruidos Molestos', category: 'Multas', amount: 50.00, type: 'Opcional', active: false }
+            ];
+
+            // --- REFERENCIAS AL DOM ---
+            const tableBody = document.getElementById('conceptsTableBody');
+            const modal = document.getElementById('conceptModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const form = document.getElementById('conceptForm');
+            const categorySelect = document.getElementById('conceptCategory');
+
+            // --- FUNCIONES ---
+            function populateCategories() {
+                categorySelect.innerHTML = '';
+                conceptCategories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    categorySelect.appendChild(option);
+                });
+            }
+
+            function renderTable() {
+                tableBody.innerHTML = '';
+                if (concepts.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-gray-500 py-10">No hay conceptos registrados.</td></tr>`;
+                    return;
+                }
+                concepts.forEach(concept => {
+                    const row = document.createElement('tr');
+                    row.className = 'bg-white border-b hover:bg-gray-50';
+                    row.innerHTML = `
+                        <td class="px-6 py-4 font-medium text-gray-900">${concept.name}</td>
+                        <td class="px-6 py-4">${concept.category}</td>
+                        <td class="px-6 py-4 text-right">${new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(concept.amount)}</td>
+                        <td class="px-6 py-4"><span class="font-semibold ${concept.type === 'Obligatorio' ? 'text-red-600' : 'text-blue-600'}">${concept.type}</span></td>
+                        <td class="px-6 py-4 text-center"><span class="px-2 py-1 font-semibold leading-tight rounded-full ${concept.active ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'}">${concept.active ? 'Activo' : 'Inactivo'}</span></td>
+                        <td class="px-6 py-4 text-center space-x-4">
+                            <button onclick="openModal(${concept.id})" class="font-medium text-blue-600 hover:underline">Editar</button>
+                            <button onclick="toggleStatus(${concept.id})" class="font-medium ${concept.active ? 'text-red-600 hover:underline' : 'text-green-600 hover:underline'}">${concept.active ? 'Desactivar' : 'Activar'}</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            window.openModal = function(id = null) {
+                form.reset();
+                populateCategories();
+                if (id) {
+                    const concept = concepts.find(c => c.id === id);
+                    modalTitle.textContent = 'Editar Concepto de Pago';
+                    document.getElementById('conceptId').value = concept.id;
+                    document.getElementById('conceptName').value = concept.name;
+                    document.getElementById('conceptCategory').value = concept.category;
+                    document.getElementById('conceptType').value = concept.type;
+                    document.getElementById('conceptAmount').value = concept.amount;
+                } else {
+                    modalTitle.textContent = 'Añadir Nuevo Concepto de Pago';
+                }
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.querySelector('.transform').classList.remove('scale-95'), 10);
+            }
+
+            window.closeModal = function() {
+                const modalContent = modal.querySelector('.transform');
+                modalContent.classList.add('scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
+            
+            window.toggleStatus = function(id) {
+                const concept = concepts.find(c => c.id === id);
+                if (concept) {
+                    concept.active = !concept.active;
+                    renderTable();
+                }
+            }
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const id = parseInt(document.getElementById('conceptId').value);
+                const newConcept = {
+                    name: document.getElementById('conceptName').value,
+                    category: document.getElementById('conceptCategory').value,
+                    type: document.getElementById('conceptType').value,
+                    amount: parseFloat(document.getElementById('conceptAmount').value),
+                    active: true
+                };
+
+                if (id) {
+                    const index = concepts.findIndex(c => c.id === id);
+                    concepts[index] = { ...concepts[index], ...newConcept };
+                } else {
+                    newConcept.id = Math.max(0, ...concepts.map(c => c.id)) + 1;
+                    concepts.push(newConcept);
+                }
+                renderTable();
+                closeModal();
+            });
+
+            // --- INICIALIZACIÓN ---
+            renderTable();
+        });
+    </script>
+</body>
+</html>

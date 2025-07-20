@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso - Sistema de Pagos de Condominio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos de Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .login-bg {
+            background-color: #f0f4f8;
+            background-image:
+                linear-gradient(to right, #eef2f6 1px, transparent 1px),
+                linear-gradient(to bottom, #eef2f6 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="login-bg">
+
+    <div class="flex min-h-screen">
+        <!-- Columna Izquierda: Branding y Logo -->
+        <div class="w-1/2 bg-white hidden lg:flex flex-col justify-between p-8">
+            <div>
+                 <!-- Logo del Condominio -->
+                 <img src="https://placehold.co/200x60/3b82f6/ffffff?text=Condo+Central" alt="Logo del Condominio" class="h-12">
+            </div>
+            <div class="self-center">
+                <!-- Imagen del edificio actualizada -->
+                <img src="https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Ilustración del condominio" class="max-w-md w-full h-auto object-cover rounded-lg shadow-lg">
+            </div>
+            <div class="text-sm text-gray-400">
+                &copy; 2025 Condo Central. Todos los derechos reservados.
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Formulario de Login -->
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-8">
+            <div class="max-w-md w-full bg-white lg:bg-transparent p-8 lg:p-0 rounded-xl lg:rounded-none">
+                <div class="text-center lg:hidden mb-8">
+                     <!-- Logo para vista móvil -->
+                     <img src="https://placehold.co/200x60/3b82f6/ffffff?text=Condo+Central" alt="Logo del Condominio" class="h-12 mx-auto">
+                </div>
+                
+                <h1 class="text-3xl font-bold text-gray-900 text-center">Bienvenido de Nuevo</h1>
+                <p class="text-gray-600 mt-2 text-center">Ingrese sus credenciales para acceder a su portal.</p>
+                
+                <!-- Formulario con ID para controlarlo con JS -->
+                <form id="loginForm" class="mt-8 space-y-6">
+                    <input type="hidden" name="remember" value="true">
+                    <div class="rounded-md shadow-sm -space-y-px">
+                        <div>
+                            <label for="username" class="sr-only">Usuario</label>
+                            <input id="username" name="username" type="text" autocomplete="username" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Correo Electrónico o DNI">
+                        </div>
+                        <div>
+                            <label for="password" class="sr-only">Contraseña</label>
+                            <input id="password" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Contraseña">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="remember-me" class="ml-2 block text-sm text-gray-900">
+                                Recordarme
+                            </label>
+                        </div>
+
+                        <div class="text-sm">
+                            <a href="#" class="font-medium text-blue-600 hover:text-blue-500">
+                                ¿Olvidó su contraseña?
+                            </a>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                                <i class="ph ph-lock-key text-blue-500 group-hover:text-blue-400"></i>
+                            </span>
+                            Ingresar
+                        </button>
+                    </div>
+                </form>
+                 <p class="mt-6 text-center text-sm text-gray-600">
+                    ¿Necesita ayuda? <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Contacte al administrador</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Script para manejar la redirección según el rol
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            // Prevenir el envío tradicional del formulario
+            event.preventDefault(); 
+            
+            // Obtener el valor del campo de usuario
+            const usernameInput = document.getElementById('username');
+            const username = usernameInput.value;
+            
+            // Lógica de redirección
+            if (username === '5555555') {
+                // Si el usuario es '5555555', redirigir al portal de administrador
+                window.location.href = 'PortalAdministrador.html';
+            } else {
+                // Para cualquier otro usuario, redirigir al portal de propietario
+                window.location.href = 'Portal.html';
+            }
+        });
+    </script>
+
+</body>
+</html>
