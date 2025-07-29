@@ -17,15 +17,33 @@
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
         }
-        .table-row:hover {
-            background-color: #f9fafb;
+        .tab-button.active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .details-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+        }
+        .details-container.open {
+            max-height: 1000px; /* Un valor suficientemente grande */
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        .chevron-icon {
+            transition: transform 0.3s ease-in-out;
+        }
+        .chevron-icon.open {
+            transform: rotate(180deg);
         }
     </style>
 </head>
 <body class="text-gray-800">
 
     <!-- Contenedor principal -->
-    <div class="container mx-auto p-4 md:p-8 max-w-6xl">
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
 
         <!-- Cabecera -->
         <header class="mb-8">
@@ -35,215 +53,266 @@
             </a>
             <div class="flex justify-between items-center">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Gestionar Usuarios</h1>
-                    <p class="text-gray-600">Asigne roles y administre el acceso de los propietarios.</p>
+                    <h1 class="text-3xl font-bold text-gray-900">Gestionar Usuarios y Solicitudes</h1>
+                    <p class="text-gray-600">Apruebe nuevos registros y administre a los propietarios existentes.</p>
                 </div>
-                <a href="index.html" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 flex-shrink-0">
+                <a href="Login.html" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 flex-shrink-0">
                     <i class="ph ph-sign-out"></i>
                     Cerrar Sesión
                 </a>
             </div>
         </header>
 
-        <!-- Filtros y Búsqueda -->
-        <div class="mb-6 flex flex-col md:flex-row gap-4">
-            <div class="relative flex-grow">
-                <!-- Se añade un ID al input para controlarlo con JS -->
-                <input type="text" id="searchInput" placeholder="Buscar por nombre, DNI o departamento..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            </div>
-            <a href="RegistrarPropietario.html" class="bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
-                <i class="ph ph-user-plus"></i>
-                <span>Nuevo Propietario</span>
-            </a>
+        <!-- Pestañas de Navegación -->
+        <div class="mb-6 border-b border-gray-200">
+            <nav id="tabsContainer" class="flex -mb-px space-x-6" aria-label="Tabs">
+                <button data-tab="requests" class="tab-button active whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
+                    Solicitudes de Registro
+                    <span id="requests-count" class="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"></span>
+                </button>
+                <button data-tab="users" class="tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
+                    Usuarios Activos
+                </button>
+            </nav>
         </div>
 
-        <!-- Tabla de Usuarios -->
-        <main class="bg-white rounded-xl shadow-md overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-gray-600">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-100">
-                        <tr>
-                            <th scope="col" class="px-6 py-3">Nombre Completo</th>
-                            <th scope="col" class="px-6 py-3">Predio</th>
-                            <th scope="col" class="px-6 py-3">Usuario / DNI</th>
-                            <th scope="col" class="px-6 py-3">Rol</th>
-                            <th scope="col" class="px-6 py-3 text-center">Estado</th>
-                            <th scope="col" class="px-6 py-3 text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <!-- Se añade un ID al tbody para manipular las filas -->
-                    <tbody id="userTableBody">
-                        <!-- Fila de Usuario 1 -->
-                        <tr class="bg-white border-b table-row">
-                            <td class="px-6 py-4 font-medium text-gray-900">Juan Pérez Gonzales</td>
-                            <td class="px-6 py-4">Torre A, Dpto. 502</td>
-                            <td class="px-6 py-4">45678901</td>
-                            <td class="px-6 py-4">
-                                <select class="border border-gray-300 rounded-md p-1 focus:ring-blue-500 focus:border-blue-500">
-                                    <option>Propietario</option>
-                                    <option selected>Junta Directiva</option>
-                                    <option>Administrador</option>
-                                </select>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full">Activo</span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <button onclick="abrirModalResetear('Juan Pérez Gonzales')" class="font-medium text-blue-600 hover:underline">Restablecer Acceso</button>
-                            </td>
-                        </tr>
-                        <!-- Fila de Usuario 2 -->
-                        <tr class="bg-white border-b table-row">
-                            <td class="px-6 py-4 font-medium text-gray-900">Maria Rodriguez López</td>
-                            <td class="px-6 py-4">Torre B, Dpto. 101</td>
-                            <td class="px-6 py-4">87654321</td>
-                            <td class="px-6 py-4">
-                                <select class="border border-gray-300 rounded-md p-1 focus:ring-blue-500 focus:border-blue-500">
-                                    <option selected>Propietario</option>
-                                    <option>Junta Directiva</option>
-                                    <option>Administrador</option>
-                                </select>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full">Activo</span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <button onclick="abrirModalResetear('Maria Rodriguez López')" class="font-medium text-blue-600 hover:underline">Restablecer Acceso</button>
-                            </td>
-                        </tr>
-                        <!-- Fila de Usuario 3 -->
-                        <tr class="bg-white border-b table-row">
-                            <td class="px-6 py-4 font-medium text-gray-900">Carlos Sanchez Vargas</td>
-                            <td class="px-6 py-4">Torre A, Dpto. 304</td>
-                            <td class="px-6 py-4">12345678</td>
-                            <td class="px-6 py-4">
-                                <select class="border border-gray-300 rounded-md p-1 focus:ring-blue-500 focus:border-blue-500">
-                                    <option selected>Propietario</option>
-                                    <option>Junta Directiva</option>
-                                    <option>Administrador</option>
-                                </select>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="px-2 py-1 font-semibold leading-tight text-red-700 bg-red-100 rounded-full">Inactivo</span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <button onclick="abrirModalResetear('Carlos Sanchez Vargas')" class="font-medium text-blue-600 hover:underline">Restablecer Acceso</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        <!-- Contenido de las Pestañas -->
+        <main>
+            <!-- Sección de Solicitudes de Registro -->
+            <div id="requestsContent" class="space-y-4">
+                <!-- Contenido generado por JS -->
+            </div>
+
+            <!-- Sección de Usuarios Activos -->
+            <div id="usersContent" class="hidden">
+                <div class="mb-6 flex flex-col md:flex-row gap-4">
+                    <div class="relative flex-grow">
+                        <input type="text" id="searchInput" placeholder="Buscar por nombre, DNI o departamento..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-600">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">Nombre Completo</th>
+                                    <th scope="col" class="px-6 py-3">Predio(s)</th>
+                                    <th scope="col" class="px-6 py-3">Usuario / DNI</th>
+                                    <th scope="col" class="px-6 py-3">Rol</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Estado</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <!-- Contenido generado por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
-
-    <!-- Modal de Confirmación para Restablecer Contraseña -->
-    <div id="resetModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform scale-95">
-            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="ph ph-key text-5xl text-yellow-500"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-gray-900">Restablecer Acceso</h2>
-            <p class="text-gray-600 mt-2 mb-6">¿Confirma que desea restablecer la contraseña del usuario <strong id="userNameToReset"></strong>? Se enviará una nueva contraseña a su correo.</p>
-            <div class="flex justify-center gap-4">
-                <button onclick="cerrarModalResetear()" class="w-full bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
-                    Cancelar
-                </button>
-                <button onclick="confirmarReseteo()" class="w-full bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                    Confirmar
-                </button>
-            </div>
-        </div>
-    </div>
     
-    <!-- Modal de Éxito -->
-    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform scale-95">
-             <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="ph ph-check-circle text-5xl text-green-600"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-gray-900">¡Éxito!</h2>
-            <p class="text-gray-600 mt-2 mb-6">La contraseña ha sido restablecida y enviada al correo del usuario.</p>
-            <button onclick="cerrarModalExito()" class="w-full bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                Entendido
-            </button>
+    <!-- Modal para ver Documento -->
+    <div id="docModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white p-4 rounded-lg max-w-2xl w-full relative">
+            <button onclick="closeDocModal()" class="absolute -top-4 -right-4 bg-white text-black rounded-full w-10 h-10 flex items-center justify-center text-2xl">&times;</button>
+            <img id="docImage" src="" alt="Documento de propiedad" class="w-full h-auto rounded-md">
         </div>
     </div>
 
     <script>
-        const resetModal = document.getElementById('resetModal');
-        const successModal = document.getElementById('successModal');
-        const userNameToReset = document.getElementById('userNameToReset');
-
-        function abrirModalResetear(userName) {
-            userNameToReset.textContent = userName;
-            resetModal.classList.remove('hidden');
-            setTimeout(() => resetModal.querySelector('.transform').classList.remove('scale-95'), 10);
-        }
-
-        function cerrarModalResetear() {
-            const modalContent = resetModal.querySelector('.transform');
-            modalContent.classList.add('scale-95');
-            setTimeout(() => resetModal.classList.add('hidden'), 300);
-        }
-        
-        function cerrarModalExito() {
-            const modalContent = successModal.querySelector('.transform');
-            modalContent.classList.add('scale-95');
-            setTimeout(() => successModal.classList.add('hidden'), 300);
-        }
-
-        function confirmarReseteo() {
-            cerrarModalResetear();
-            // Simular una pequeña demora de la API
-            setTimeout(() => {
-                successModal.classList.remove('hidden');
-                setTimeout(() => successModal.querySelector('.transform').classList.remove('scale-95'), 10);
-            }, 400);
-        }
-
-        // Cerrar modales con la tecla Escape
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                if (!resetModal.classList.contains('hidden')) {
-                    cerrarModalResetear();
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- DATOS DE EJEMPLO ---
+            let registrationRequests = [
+                { 
+                    id: 101, 
+                    name: 'Lucia Mendoza', 
+                    email: 'lucia.m@example.com', 
+                    phone: '987654321', 
+                    properties: [
+                        { name: 'Torre A, Dpto. 1204', luz: '1234567', agua: '9876543' },
+                        { name: 'Estacionamiento E-23', luz: 'N/A', agua: 'N/A' }
+                    ],
+                    requestDate: '29/07/2025', 
+                    docUrl: 'https://placehold.co/800x1100/ccc/ffffff?text=Contrato+Lucia' 
+                },
+                { 
+                    id: 102, 
+                    name: 'Javier Torres', 
+                    email: 'j.torres@example.com', 
+                    phone: '912345678', 
+                    properties: [
+                        { name: 'Torre C, Dpto. 301', luz: '7654321', agua: '3456789' }
+                    ],
+                    requestDate: '28/07/2025', 
+                    docUrl: 'https://placehold.co/800x1100/eee/333333?text=Titulo+Javier' 
                 }
-                if (!successModal.classList.contains('hidden')) {
-                    cerrarModalExito();
+            ];
+
+            let activeUsers = [
+                { id: 1, name: 'Juan Pérez Gonzales', properties: 'Torre A, Dpto. 502', dni: '45678901', role: 'Junta Directiva', active: true },
+                { id: 2, name: 'Maria Rodriguez López', properties: 'Torre B, Dpto. 101', dni: '87654321', role: 'Propietario', active: true },
+                { id: 3, name: 'Carlos Sanchez Vargas', properties: 'Torre A, Dpto. 304', dni: '12345678', role: 'Propietario', active: false }
+            ];
+
+            // --- REFERENCIAS AL DOM ---
+            const tabsContainer = document.getElementById('tabsContainer');
+            const requestsContent = document.getElementById('requestsContent');
+            const usersContent = document.getElementById('usersContent');
+            const requestsCount = document.getElementById('requests-count');
+            const usersTableBody = document.getElementById('usersTableBody');
+            const docModal = document.getElementById('docModal');
+            const docImage = document.getElementById('docImage');
+
+            // --- FUNCIONES DE RENDERIZADO ---
+            function renderRequests() {
+                requestsContent.innerHTML = '';
+                requestsCount.textContent = registrationRequests.length;
+                if (registrationRequests.length === 0) {
+                    requestsContent.innerHTML = `<div class="text-center text-gray-500 py-10">No hay solicitudes pendientes.</div>`;
+                    return;
                 }
+
+                registrationRequests.forEach(req => {
+                    const reqContainer = document.createElement('div');
+                    reqContainer.className = 'bg-white rounded-xl shadow-md';
+                    
+                    const propertiesSummary = req.properties.map(p => p.name).join(', ');
+                    const propertiesDetailHTML = req.properties.map(p => `
+                        <div class="mt-2 p-2 border rounded-md bg-gray-50">
+                            <p class="font-semibold text-sm">${p.name}</p>
+                            <div class="text-xs grid grid-cols-2 gap-x-2">
+                                <span><strong>Suministro Luz:</strong> ${p.luz}</span>
+                                <span><strong>Suministro Agua:</strong> ${p.agua}</span>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    reqContainer.innerHTML = `
+                        <div class="request-header p-4 grid grid-cols-4 gap-4 items-center cursor-pointer hover:bg-gray-50 rounded-xl">
+                            <p class="col-span-1 font-bold text-gray-800">${req.name}</p>
+                            <p class="col-span-1 text-gray-600 truncate" title="${propertiesSummary}">${propertiesSummary}</p>
+                            <p class="col-span-1 text-sm text-gray-500">Solicitado el: ${req.requestDate}</p>
+                            <div class="col-span-1 flex items-center justify-end gap-4">
+                                <span class="text-sm font-medium text-yellow-800 bg-yellow-100 px-3 py-1 rounded-full">Pendiente</span>
+                                <i class="ph ph-caret-down text-2xl text-gray-500 chevron-icon"></i>
+                            </div>
+                        </div>
+                        <div class="details-container px-4 border-t border-gray-100">
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-gray-500 mt-2">Predios Registrados</h4>
+                                        ${propertiesDetailHTML}
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-gray-500">Información de Contacto</h4>
+                                        <p class="text-sm"><strong>Email:</strong> ${req.email}</p>
+                                        <p class="text-sm"><strong>Teléfono:</strong> ${req.phone}</p>
+                                    </div>
+                                    <div class="flex items-stretch gap-2">
+                                        <button onclick="processRequest(${req.id}, false)" class="w-full text-center text-sm bg-red-500 text-white px-3 py-2 rounded-lg font-semibold hover:bg-red-600">Rechazar</button>
+                                        <button onclick="processRequest(${req.id}, true)" class="w-full text-center text-sm bg-green-500 text-white px-3 py-2 rounded-lg font-semibold hover:bg-green-600">Aprobar</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-gray-500 mt-2">Documento de Propiedad</h4>
+                                    <button onclick="openDocModal('${req.docUrl}')" class="mt-2 w-full text-sm bg-gray-200 text-gray-800 px-3 py-2 rounded-lg font-semibold hover:bg-gray-300 flex items-center justify-center gap-2">
+                                        <i class="ph ph-file-pdf"></i> Ver Documento Adjunto
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    requestsContent.appendChild(reqContainer);
+                });
             }
-        });
 
-        // --- INICIO: Lógica de Búsqueda en la Tabla ---
-        const searchInput = document.getElementById('searchInput');
-        const userTableBody = document.getElementById('userTableBody');
-        const tableRows = userTableBody.getElementsByTagName('tr');
+            function renderUsers() {
+                usersTableBody.innerHTML = '';
+                activeUsers.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.className = 'bg-white border-b hover:bg-gray-50';
+                    row.innerHTML = `
+                        <td class="px-6 py-4 font-medium text-gray-900">${user.name}</td>
+                        <td class="px-6 py-4">${user.properties}</td>
+                        <td class="px-6 py-4">${user.dni}</td>
+                        <td class="px-6 py-4">${user.role}</td>
+                        <td class="px-6 py-4 text-center"><span class="px-2 py-1 font-semibold leading-tight rounded-full ${user.active ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'}">${user.active ? 'Activo' : 'Inactivo'}</span></td>
+                        <td class="px-6 py-4 text-center"><button class="font-medium text-blue-600 hover:underline">Restablecer Acceso</button></td>
+                    `;
+                    usersTableBody.appendChild(row);
+                });
+            }
 
-        searchInput.addEventListener('keyup', function() {
-            const filter = searchInput.value.toLowerCase();
-
-            for (let i = 0; i < tableRows.length; i++) {
-                const cells = tableRows[i].getElementsByTagName('td');
-                // Celdas en las que se buscará: Nombre (0), Predio (1), Usuario/DNI (2)
-                const nameCell = cells[0];
-                const propertyCell = cells[1];
-                const userDniCell = cells[2];
-
-                if (nameCell && propertyCell && userDniCell) {
-                    const rowText = (nameCell.textContent || nameCell.innerText) + 
-                                  (propertyCell.textContent || propertyCell.innerText) + 
-                                  (userDniCell.textContent || userDniCell.innerText);
-
-                    if (rowText.toLowerCase().indexOf(filter) > -1) {
-                        tableRows[i].style.display = "";
+            // --- LÓGICA DE INTERACCIÓN ---
+            tabsContainer.addEventListener('click', (e) => {
+                const button = e.target.closest('button');
+                if (button) {
+                    const tab = button.dataset.tab;
+                    tabsContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    if (tab === 'requests') {
+                        requestsContent.classList.remove('hidden');
+                        usersContent.classList.add('hidden');
                     } else {
-                        tableRows[i].style.display = "none";
+                        requestsContent.classList.add('hidden');
+                        usersContent.classList.remove('hidden');
                     }
                 }
-            }
-        });
-        // --- FIN: Lógica de Búsqueda en la Tabla ---
-    </script>
+            });
 
+            requestsContent.addEventListener('click', (e) => {
+                const header = e.target.closest('.request-header');
+                if (header) {
+                    const details = header.nextElementSibling;
+                    const icon = header.querySelector('.chevron-icon');
+                    details.classList.toggle('open');
+                    icon.classList.toggle('open');
+                }
+            });
+            
+            window.openDocModal = function(docUrl) {
+                docImage.src = docUrl;
+                docModal.classList.remove('hidden');
+            }
+            window.closeDocModal = function() {
+                docModal.classList.add('hidden');
+                docImage.src = '';
+            }
+
+            window.processRequest = function(id, isApproved) {
+                const requestIndex = registrationRequests.findIndex(req => req.id === id);
+                if (requestIndex > -1) {
+                    const request = registrationRequests[requestIndex];
+                    if (isApproved) {
+                        // Simular la creación de un nuevo usuario
+                        activeUsers.push({
+                            id: activeUsers.length + 10,
+                            name: request.name,
+                            properties: request.properties.map(p => p.name).join(', '),
+                            dni: 'N/A', // Se completaría en un paso posterior
+                            role: 'Propietario',
+                            active: true
+                        });
+                        alert(`Solicitud de ${request.name} aprobada.`);
+                    } else {
+                        alert(`Solicitud de ${request.name} rechazada.`);
+                    }
+                    // Eliminar la solicitud de la lista de pendientes
+                    registrationRequests.splice(requestIndex, 1);
+                    renderRequests();
+                    renderUsers();
+                }
+            }
+
+            // --- INICIALIZACIÓN ---
+            renderRequests();
+            renderUsers();
+        });
+    </script>
 </body>
 </html>

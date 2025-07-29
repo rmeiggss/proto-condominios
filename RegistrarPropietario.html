@@ -17,6 +17,16 @@
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
         }
+        .hidden-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            opacity: 0;
+        }
+        .visible-section {
+            max-height: 1000px; /* Suficientemente grande */
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="text-gray-800">
@@ -34,7 +44,7 @@
                 <h1 class="text-3xl font-bold text-gray-900">Registrar Nuevo Propietario</h1>
                 <p class="text-gray-600">Complete los campos para crear un nuevo registro.</p>
             </div>
-            <a href="index.html" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 flex-shrink-0">
+            <a href="Login.html" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 flex-shrink-0">
                 <i class="ph ph-sign-out"></i>
                 Cerrar Sesión
             </a>
@@ -48,7 +58,7 @@
                 <div>
                     <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4 flex items-center gap-2">
                         <i class="ph ph-user-circle text-2xl text-blue-600"></i>
-                        Datos del Propietario
+                        Datos del Propietario Principal
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -79,64 +89,81 @@
                             <label for="telefono" class="block text-sm font-medium text-gray-700">Teléfono</label>
                             <input type="tel" id="telefono" name="telefono" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                         </div>
+                        <div>
+                            <label for="estado_civil" class="block text-sm font-medium text-gray-700">Estado Civil</label>
+                            <select id="estado_civil" name="estado_civil" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option>Soltero(a)</option>
+                                <option value="Casado(a)">Casado(a)</option>
+                                <option>Viudo(a)</option>
+                                <option>Divorciado(a)</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
+
+                <!-- INICIO: Sección de Cónyuge (oculta por defecto) -->
+                <div id="spouseSection" class="hidden-section">
+                    <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4 flex items-center gap-2">
+                        <i class="ph ph-heart text-2xl text-pink-600"></i>
+                        Datos del Cónyuge
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="conyuge_nombres" class="block text-sm font-medium text-gray-700">Nombres del Cónyuge</label>
+                            <input type="text" id="conyuge_nombres" name="conyuge_nombres" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                            <label for="conyuge_apellidos" class="block text-sm font-medium text-gray-700">Apellidos del Cónyuge</label>
+                            <input type="text" id="conyuge_apellidos" name="conyuge_apellidos" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                            <label for="conyuge_tipo_documento" class="block text-sm font-medium text-gray-700">Tipo de Documento</label>
+                            <select id="conyuge_tipo_documento" name="conyuge_tipo_documento" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md">
+                                <option>DNI</option>
+                                <option>Carnet de Extranjería</option>
+                                <option>Pasaporte</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="conyuge_numero_documento" class="block text-sm font-medium text-gray-700">Número de Documento</label>
+                            <input type="text" id="conyuge_numero_documento" name="conyuge_numero_documento" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md">
+                        </div>
+                    </div>
+                </div>
+                <!-- FIN: Sección de Cónyuge -->
 
                 <!-- Sección de Datos del Predio -->
                 <div>
                     <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4 flex items-center gap-2">
                         <i class="ph ph-house-line text-2xl text-green-600"></i>
-                        Datos del Predio
+                        Datos de Predios
                     </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div>
-                            <label for="torre" class="block text-sm font-medium text-gray-700">Torre / Bloque</label>
-                            <input type="text" id="torre" name="torre" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label for="numero_departamento" class="block text-sm font-medium text-gray-700">N° de Departamento</label>
-                            <input type="text" id="numero_departamento" name="numero_departamento" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label for="metros_cuadrados" class="block text-sm font-medium text-gray-700">Metros Cuadrados (m²)</label>
-                            <input type="number" id="metros_cuadrados" name="metros_cuadrados" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                        </div>
+                    <div id="propertiesContainer" class="space-y-6">
+                        <!-- Las filas de predios se añadirán aquí dinámicamente -->
                     </div>
+                     <button type="button" id="addPropertyBtn" class="mt-4 text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1">
+                        <i class="ph ph-plus-circle"></i>
+                        Añadir Otro Predio
+                    </button>
                 </div>
 
-                <!-- Sección de Documentación -->
+                <!-- Sección de Vehículos -->
                 <div>
                     <h2 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-4 flex items-center gap-2">
-                        <i class="ph ph-file-pdf text-2xl text-red-600"></i>
-                        Documento de Propiedad
+                        <i class="ph ph-car text-2xl text-orange-600"></i>
+                        Vehículos del Propietario
                     </h2>
-                    <div>
-                        <label for="documento_propiedad" class="block text-sm font-medium text-gray-700">Contrato de Compra/Venta u otro</label>
-                        <div class="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                            <div class="space-y-1 text-center">
-                                <i class="ph ph-upload-simple text-4xl text-gray-400"></i>
-                                <div class="flex text-sm text-gray-600">
-                                    <label for="documento_propiedad_input" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                                        <span>Subir un archivo</span>
-                                        <input id="documento_propiedad_input" name="documento_propiedad" type="file" class="sr-only" required>
-                                    </label>
-                                    <p class="pl-1">o arrastrar y soltar</p>
-                                </div>
-                                <p class="text-xs text-gray-500">PDF, PNG, JPG hasta 10MB</p>
-                            </div>
-                        </div>
-                    </div>
+                    <div id="vehiclesContainer" class="space-y-4"></div>
+                    <button type="button" id="addVehicleBtn" class="mt-4 text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1">
+                        <i class="ph ph-plus-circle"></i>
+                        Añadir Vehículo
+                    </button>
                 </div>
 
                 <!-- Botones de Acción -->
-                <div class="flex justify-end gap-4 pt-4 border-t">
-                    <a href="PortalAdministrador.html" class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
-                        Cancelar
-                    </a>
-                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2">
-                        <i class="ph ph-check-circle"></i>
-                        Registrar Propietario
-                    </button>
+                <div class="flex justify-end gap-4 pt-4 border-t mt-8">
+                    <a href="PortalAdministrador.html" class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-colors">Cancelar</a>
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2"><i class="ph ph-check-circle"></i>Registrar Propietario</button>
                 </div>
             </form>
         </main>
@@ -145,41 +172,122 @@
     <!-- Modal de Confirmación -->
     <div id="successModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center transform scale-95">
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="ph ph-check text-5xl text-green-600"></i>
-            </div>
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"><i class="ph ph-check text-5xl text-green-600"></i></div>
             <h2 class="text-2xl font-bold text-gray-900">¡Éxito!</h2>
-            <p class="text-gray-600 mt-2 mb-6">El propietario ha sido registrado correctamente. Se ha enviado un correo con sus credenciales de acceso.</p>
-            <a href="PortalAdministrador.html" class="w-full inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                Entendido
-            </a>
+            <p class="text-gray-600 mt-2 mb-6">El propietario ha sido registrado correctamente.</p>
+            <a href="PortalAdministrador.html" class="w-full inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold">Entendido</a>
         </div>
     </div>
 
     <script>
-        document.getElementById('registerForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevenir el envío real del formulario
-
-            // Simular el registro y mostrar el modal de éxito
+        document.addEventListener('DOMContentLoaded', function() {
+            const registerForm = document.getElementById('registerForm');
             const successModal = document.getElementById('successModal');
-            const modalContent = successModal.querySelector('.transform');
-            
-            successModal.classList.remove('hidden');
-            setTimeout(() => {
-                successModal.classList.remove('opacity-0');
-                modalContent.classList.remove('scale-95');
-            }, 10);
-        });
 
-        // Para mejorar la UX del input de archivo
-        const fileInput = document.getElementById('documento_propiedad_input');
-        const fileLabel = document.querySelector('label[for="documento_propiedad_input"] span');
-        fileInput.addEventListener('change', function() {
-            if (this.files && this.files.length > 0) {
-                fileLabel.textContent = this.files[0].name;
-            } else {
-                fileLabel.textContent = 'Subir un archivo';
+            registerForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                successModal.classList.remove('hidden');
+                setTimeout(() => { successModal.querySelector('.transform').classList.remove('scale-95'); }, 10);
+            });
+
+            // --- Lógica para Cónyuge ---
+            const civilStatusSelect = document.getElementById('estado_civil');
+            const spouseSection = document.getElementById('spouseSection');
+            civilStatusSelect.addEventListener('change', function() {
+                if (this.value === 'Casado(a)') {
+                    spouseSection.classList.add('visible-section');
+                    spouseSection.classList.remove('hidden-section');
+                } else {
+                    spouseSection.classList.add('hidden-section');
+                    spouseSection.classList.remove('visible-section');
+                }
+            });
+
+            // --- Lógica para Predios ---
+            const propertiesContainer = document.getElementById('propertiesContainer');
+            const addPropertyBtn = document.getElementById('addPropertyBtn');
+            let propertyCount = 0;
+
+            function addPropertyRow() {
+                propertyCount++;
+                const propertyRow = document.createElement('div');
+                propertyRow.id = `property-row-${propertyCount}`;
+                propertyRow.className = 'p-4 bg-gray-50 rounded-lg border space-y-4';
+                propertyRow.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <p class="font-semibold text-gray-700">Predio #${propertyCount}</p>
+                        ${propertyCount > 1 ? `<button type="button" onclick="removePropertyRow(${propertyCount})" class="text-sm text-red-600 hover:underline">Eliminar Predio</button>` : ''}
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-5 gap-4">
+                        <div class="sm:col-span-1"><label for="torre-${propertyCount}" class="block text-sm font-medium text-gray-700">Torre</label><input type="text" name="torre[]" id="torre-${propertyCount}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                        <div class="sm:col-span-1"><label for="depto-${propertyCount}" class="block text-sm font-medium text-gray-700">Depto.</label><input type="text" name="depto[]" id="depto-${propertyCount}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                        <div class="sm:col-span-1"><label for="luz-${propertyCount}" class="block text-sm font-medium text-gray-700">Sumin. Luz</label><input type="text" name="luz[]" id="luz-${propertyCount}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                        <div class="sm:col-span-1"><label for="agua-${propertyCount}" class="block text-sm font-medium text-gray-700">Sumin. Agua</label><input type="text" name="agua[]" id="agua-${propertyCount}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                        <div class="sm:col-span-1"><label for="metros-${propertyCount}" class="block text-sm font-medium text-gray-700">m²</label><input type="number" name="metros[]" id="metros-${propertyCount}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Documento de Propiedad</label>
+                        <div class="mt-1 flex justify-center px-6 py-4 border-2 border-gray-300 border-dashed rounded-md">
+                            <div class="space-y-1 text-center">
+                                <i class="ph ph-file-pdf text-3xl text-gray-400"></i>
+                                <div class="flex text-sm text-gray-600">
+                                    <label for="documento_propiedad_input-${propertyCount}" class="relative cursor-pointer bg-gray-50 rounded-md font-medium text-blue-600 hover:text-blue-500">
+                                        <span>Subir archivo</span>
+                                        <input id="documento_propiedad_input-${propertyCount}" name="documento_propiedad[]" type="file" class="sr-only">
+                                    </label>
+                                </div>
+                                <p class="text-xs text-gray-500" id="file-name-${propertyCount}">PDF, PNG, JPG hasta 10MB</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                propertiesContainer.appendChild(propertyRow);
             }
+            window.removePropertyRow = function(id) {
+                document.getElementById(`property-row-${id}`)?.remove();
+            }
+            addPropertyBtn.addEventListener('click', addPropertyRow);
+            addPropertyRow(); // Añadir la primera fila por defecto
+
+            // --- Lógica para Vehículos ---
+            const vehiclesContainer = document.getElementById('vehiclesContainer');
+            const addVehicleBtn = document.getElementById('addVehicleBtn');
+            let vehicleCount = 0;
+
+            function addVehicleRow() {
+                vehicleCount++;
+                const vehicleRow = document.createElement('div');
+                vehicleRow.id = `vehicle-row-${vehicleCount}`;
+                vehicleRow.className = 'grid grid-cols-1 sm:grid-cols-5 gap-4 items-end p-4 bg-gray-50 rounded-lg border';
+                vehicleRow.innerHTML = `
+                    <div class="sm:col-span-1"><label for="placa-${vehicleCount}" class="block text-sm font-medium text-gray-700">Placa</label><input type="text" name="placa[]" id="placa-${vehicleCount}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                    <div class="sm:col-span-1"><label for="marca-${vehicleCount}" class="block text-sm font-medium text-gray-700">Marca</label><input type="text" name="marca[]" id="marca-${vehicleCount}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                    <div class="sm:col-span-1"><label for="modelo-${vehicleCount}" class="block text-sm font-medium text-gray-700">Modelo</label><input type="text" name="modelo[]" id="modelo-${vehicleCount}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                    <div class="sm:col-span-1"><label for="color-${vehicleCount}" class="block text-sm font-medium text-gray-700">Color</label><input type="text" name="color[]" id="color-${vehicleCount}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"></div>
+                    <div class="sm:col-span-1"><button type="button" onclick="removeVehicleRow(${vehicleCount})" class="w-full bg-red-100 text-red-700 px-3 py-2 rounded-md font-semibold hover:bg-red-200 flex items-center justify-center gap-1"><i class="ph ph-trash"></i>Eliminar</button></div>
+                `;
+                vehiclesContainer.appendChild(vehicleRow);
+            }
+            window.removeVehicleRow = function(id) {
+                document.getElementById(`vehicle-row-${id}`)?.remove();
+            }
+            addVehicleBtn.addEventListener('click', addVehicleRow);
+
+            // --- Event Delegation para File Inputs ---
+            document.body.addEventListener('change', function(event) {
+                if (event.target.matches('input[name="documento_propiedad[]"]')) {
+                    const fileInput = event.target;
+                    const count = fileInput.id.split('-').pop();
+                    const fileNameDisplay = document.getElementById(`file-name-${count}`);
+                    if (fileInput.files && fileInput.files.length > 0) {
+                        fileNameDisplay.textContent = fileInput.files[0].name;
+                        fileNameDisplay.classList.add('font-semibold', 'text-blue-600');
+                    } else {
+                        fileNameDisplay.textContent = 'PDF, PNG, JPG hasta 10MB';
+                        fileNameDisplay.classList.remove('font-semibold', 'text-blue-600');
+                    }
+                }
+            });
         });
     </script>
 
