@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,6 +17,7 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+
         .login-bg {
             background-color: #f0f4f8;
             background-image:
@@ -25,18 +27,20 @@
         }
     </style>
 </head>
+
 <body class="login-bg">
 
     <div class="flex min-h-screen">
         <!-- Columna Izquierda: Branding y Logo -->
         <div class="w-1/2 bg-white hidden lg:flex flex-col justify-between p-8">
             <div>
-                 <!-- Logo del Condominio -->
-                 <img src="./assets/vas2-logo.png" alt="VAS2" class="h-20">
+                <!-- Logo del Condominio -->
+                <img src="./assets/vas2-logo.png" alt="VAS2" class="h-20">
             </div>
             <div class="self-center">
                 <!-- Imagen del edificio actualizada -->
-                <img src="https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Ilustración del condominio" class="max-w-md w-full h-auto object-cover rounded-lg shadow-lg">
+                <img src="https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=600"
+                    alt="Ilustración del condominio" class="max-w-md w-full h-auto object-cover rounded-lg shadow-lg">
             </div>
             <div class="text-sm text-gray-400">
 
@@ -48,30 +52,36 @@
         <div class="w-full lg:w-1/2 flex items-center justify-center p-8">
             <div class="max-w-md w-full bg-white lg:bg-transparent p-8 lg:p-0 rounded-xl lg:rounded-none">
                 <div class="text-center lg:hidden mb-8">
-                     <!-- Logo para vista móvil -->
-                     <img src="./assets/vas2-logo.png" alt="Logo del Condominio" class="h-12 mx-auto">
+                    <!-- Logo para vista móvil -->
+                    <img src="./assets/vas2-logo.png" alt="Logo del Condominio" class="h-12 mx-auto">
                 </div>
-                
+
                 <h1 class="text-3xl font-bold text-gray-900 text-center">Bienvenido</h1>
                 <p class="text-gray-600 mt-2 text-center">Ingrese sus credenciales para acceder a su portal.</p>
-                
+
                 <!-- Formulario con ID para controlarlo con JS -->
                 <form id="loginForm" class="mt-8 space-y-6">
                     <input type="hidden" name="remember" value="true">
                     <div class="rounded-md shadow-sm -space-y-px">
                         <div>
                             <label for="username" class="sr-only">Usuario</label>
-                            <input id="username" name="username" type="text" autocomplete="username" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Correo Electrónico o DNI">
+                            <input id="username" name="username" type="text" autocomplete="username" required
+                                class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                                placeholder="Correo Electrónico o DNI">
                         </div>
                         <div>
                             <label for="password" class="sr-only">Contraseña</label>
-                            <input id="password" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" placeholder="Contraseña">
+                            <input id="password" name="password" type="password" autocomplete="current-password"
+                                required
+                                class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                                placeholder="Contraseña">
                         </div>
                     </div>
 
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
-                            <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <input id="remember-me" name="remember-me" type="checkbox"
+                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                             <label for="remember-me" class="ml-2 block text-sm text-gray-900">
                                 Recordarme
                             </label>
@@ -85,7 +95,8 @@
                     </div>
 
                     <div>
-                        <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <button type="submit"
+                            class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                             <span class="absolute left-0 inset-y-0 flex items-center pl-3">
                                 <i class="ph ph-lock-key text-blue-500 group-hover:text-blue-400"></i>
                             </span>
@@ -93,15 +104,17 @@
                         </button>
                     </div>
                 </form>
-                 <p class="mt-6 text-center text-sm text-gray-600">
-                    ¿Necesita ayuda? <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Contacte al administrador</a>.
+                <p class="mt-6 text-center text-sm text-gray-600">
+                    ¿Necesita ayuda? <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Contacte al
+                        administrador</a>.
                 </p>
                 <!-- Solo para la maqueta: atajos de rol. Eliminar en el sistema real. -->
                 <div class="mt-6 border-t border-gray-200 pt-4 text-center text-xs text-gray-500">
                     <p class="font-semibold text-gray-600 mb-1">Usuarios de demostración</p>
                     <p><code class="bg-gray-100 px-1.5 py-0.5 rounded">admin</code> Administrador &middot;
-                       <code class="bg-gray-100 px-1.5 py-0.5 rounded">finanzas</code> Financiero &middot;
-                       cualquier otro &rarr; Propietario</p>
+                        <code class="bg-gray-100 px-1.5 py-0.5 rounded">finanzas</code> Financiero &middot;
+                        cualquier otro &rarr; Propietario
+                    </p>
                 </div>
             </div>
         </div>
@@ -109,14 +122,14 @@
 
     <script>
         // Script para manejar la redirección según el rol
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
             // Prevenir el envío tradicional del formulario
-            event.preventDefault(); 
-            
+            event.preventDefault();
+
             // Obtener el valor del campo de usuario
             const usernameInput = document.getElementById('username');
             const username = usernameInput.value;
-            
+
             // Lógica de redirección según el rol del usuario
             if (username === '5555555' || username === 'admin') {
                 // Rol ADMIN -> menú de gestión
@@ -132,4 +145,5 @@
     </script>
 
 </body>
+
 </html>

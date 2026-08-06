@@ -66,6 +66,10 @@
                     <i class="ph ph-shield-check"></i>
                     Volver al Panel Admin
                 </a>
+                <a href="PortalUsuario.html" id="user-return-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 hidden">
+                    <i class="ph ph-shield-check"></i>
+                    Volver al Panel Usuario
+                </a>
                 <button onclick="abrirModalLogout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2">
                     <i class="ph ph-sign-out"></i>
                     Cerrar Sesión
@@ -311,6 +315,11 @@
                 const adminReturnBtn = document.getElementById('admin-return-btn');
                 if (adminReturnBtn) {
                     adminReturnBtn.classList.remove('hidden');
+                }
+            }else if (role === 'user') {
+                const userReturnBtn = document.getElementById('user-return-btn');
+                if (userReturnBtn) {
+                    userReturnBtn.classList.remove('hidden');
                 }
             }
         }

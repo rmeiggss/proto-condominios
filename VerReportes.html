@@ -28,9 +28,13 @@
 
         <!-- Cabecera -->
         <header class="mb-8">
-            <a href="PortalAdministrador.html" class="text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1 mb-2">
+            <a href="PortalAdministrador.html" class="text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1 mb-2 hidden" id="admin-return-btn">
                 <i class="ph ph-arrow-left"></i>
                 Volver al Menú de Gestión
+            </a>
+            <a href="PortalUsuario.html" class="text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1 mb-2 hidden" id="user-return-btn">
+                <i class="ph ph-arrow-left"></i>
+                Volver al Menú de Usuario
             </a>
             <div class="flex justify-between items-center">
                 <div>
@@ -263,11 +267,30 @@
                 new Chart(expensesCtx, { type: 'doughnut', data: { labels: reportData.expensesReport.categories.map(c => c.categoria), datasets: [{ label: 'Distribución de Gastos', data: reportData.expensesReport.categories.map(c => c.real), backgroundColor: ['#3b82f6', '#10b981', '#f97316', '#8b5cf6', '#64748b'], hoverOffset: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' }, tooltip: { callbacks: { label: (c) => `${c.label}: ${formatCurrency(c.raw)}` } } } } });
             }
 
+            function checkAdminRole() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const role = urlParams.get('role');
+                if (role === 'admin') {
+                    const adminReturnBtn = document.getElementById('admin-return-btn');
+                    if (adminReturnBtn) {
+                        adminReturnBtn.classList.remove('hidden');
+                    }
+                } else {
+                    const userReturnBtn = document.getElementById('user-return-btn');
+                    if (userReturnBtn) {
+                        userReturnBtn.classList.remove('hidden');
+                    }
+                }
+            }
+
             // --- 3. INICIALIZACIÓN ---
             renderKPIs();
             renderDelinquencyTable();
             renderExpensesTable();
             renderCharts();
+            checkAdminRole();
+
+
         });
     </script>
 </body>
