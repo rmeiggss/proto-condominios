@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Financiero - Sistema de Pagos de Condominio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos de Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+
+        /* --- Paleta de visualizacion (roles, no hex sueltos) --- */
+        .viz-root {
+            --surface-1:      #ffffff;
+            --text-primary:   #0b0b0b;
+            --text-secondary: #52514e;
+            --text-muted:     #898781;
+            --gridline:       #e1e0d9;
+            --baseline:       #c3c2b7;
+
+            /* magnitud: un solo tono por contexto secuencial */
+            --mag-ingreso:    #2a78d6;   /* azul  */
+            --mag-egreso:     #eb6834;   /* naranja */
+
+            /* rampa ordinal de antiguedad (un solo tono, L monotona) */
+            --age-1: #86b6ef;
+            --age-2: #5598e7;
+            --age-3: #2a78d6;
+            --age-4: #184f95;
+
+            /* estado: paleta reservada, siempre con icono + etiqueta */
+            --st-good:     #0ca30c;
+            --st-warning:  #fab219;
+            --st-critical: #d03b3b;
+            --st-neutral:  #898781;
+        }
+
+        .tag { padding: 0.2rem 0.7rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; }
+        .card { background: var(--surface-1); border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+        .tabular { font-variant-numeric: tabular-nums; }
+        .chart-box { position: relative; }
+        table.viz-table th { font-weight: 600; color: var(--text-secondary); }
+        table.viz-table td, table.viz-table th { border-bottom: 1px solid var(--gridline); }
+        details > summary { cursor: pointer; list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        .seg { display: inline-block; height: 100%; }
+    </style>
+</head>
+<body class="viz-root">
+
+<div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+    <!-- ============ CABECERA ============ -->
+    <header class="mb-6">
+        <a href="PortalAdministrador.html" class="text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1 mb-2">
+            <i class="ph ph-arrow-left"></i>
+            Volver al Menú de Gestión
+        </a>
+        <div class="flex flex-wrap justify-between items-center gap-4">
+            <div>
+                <div class="flex items-center gap-3 mb-1">
+                    <h1 class="text-3xl font-bold text-gray-900">Dashboard Financiero</h1>
+                    <span class="tag bg-indigo-100 text-indigo-800">
+                        <i class="ph ph-shield-check"></i> Rol Financiero
+                    </span>
+                </div>
+                <p class="text-gray-600">Villa Alameda Sur &middot; Estado consolidado al <strong id="fechaCorte">30/07/2026</strong></p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="btnExportar" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 text-sm font-semibold">
+                    <i class="ph ph-microsoft-excel-logo text-lg"></i>
+                    Exportar a Excel
+                </button>
+                <a href="index.html" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 text-sm font-semibold">
+                    <i class="ph ph-sign-out"></i>
+                    Cerrar Sesión
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============ FILTROS (una sola fila, sobre los graficos) ============ -->
+    <div class="card p-4 mb-6 flex flex-wrap items-end gap-4">
+        <div>
+            <label for="fEtapa" class="block text-xs font-semibold text-gray-500 mb-1">Etapa</label>
+            <select id="fEtapa" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
+                <option value="TODAS">Todas las etapas</option>
+                <option value="II">Villa II</option>
+                <option value="III">Villa III</option>
+            </select>
+        </div>
+        <div>
+            <label for="fPeriodo" class="block text-xs font-semibold text-gray-500 mb-1">Periodo</label>
+            <select id="fPeriodo" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
+                <option value="ACUM">Acumulado del ejercicio</option>
+                <option value="MES">Mes en curso</option>
+                <option value="TRIM">Último trimestre</option>
+            </select>
+        </div>
+        <div class="ml-auto text-xs text-gray-500 flex items-center gap-2">
+            <i class="ph ph-info text-base"></i>
+            <span>Maqueta con cifras reales agregadas. Los nombres de la tabla son ficticios.</span>
+        </div>
+    </div>
+
+    <!-- ============ KPIs ============ -->
+    <section aria-label="Indicadores principales" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div class="card p-5">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:#e8f3ff;color:var(--mag-ingreso)"><i class="ph ph-arrow-fat-lines-up text-2xl"></i></div>
+                <p class="text-sm font-medium" style="color:var(--text-secondary)">Ingresos acumulados</p>
+            </div>
+            <p class="text-3xl font-bold tabular" style="color:var(--text-primary)" id="kpiIngresos">S/ 0</p>
+        </div>
+        <div class="card p-5">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:#fdeee7;color:var(--mag-egreso)"><i class="ph ph-arrow-fat-lines-down text-2xl"></i></div>
+                <p class="text-sm font-medium" style="color:var(--text-secondary)">Egresos acumulados</p>
+            </div>
+            <p class="text-3xl font-bold tabular" style="color:var(--text-primary)" id="kpiEgresos">S/ 0</p>
+        </div>
+        <div class="card p-5">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:#e6f7e6;color:var(--st-good)"><i class="ph ph-wallet text-2xl"></i></div>
+                <p class="text-sm font-medium" style="color:var(--text-secondary)">Saldo disponible</p>
+            </div>
+            <p class="text-3xl font-bold tabular" style="color:var(--st-good)" id="kpiSaldo">S/ 0</p>
+        </div>
+        <div class="card p-5">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:#fbe7e7;color:var(--st-critical)"><i class="ph ph-hand-coins text-2xl"></i></div>
+                <p class="text-sm font-medium" style="color:var(--text-secondary)">Deuda por cobrar</p>
+            </div>
+            <p class="text-3xl font-bold tabular" style="color:var(--text-primary)" id="kpiDeuda">S/ 0</p>
+            <p class="text-xs mt-1" style="color:var(--text-muted)"><span id="kpiMorosos">0</span> propietarios en retraso</p>
+        </div>
+        <div class="card p-5">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:#fff6e0;color:#a7730d"><i class="ph ph-question text-2xl"></i></div>
+                <p class="text-sm font-medium" style="color:var(--text-secondary)">Sin identificar</p>
+            </div>
+            <p class="text-3xl font-bold tabular" style="color:var(--text-primary)" id="kpiNoIdent">S/ 0</p>
+            <a href="#conciliacion" class="text-xs font-semibold text-blue-600 hover:underline mt-1 inline-block">Ir a conciliación &rarr;</a>
+        </div>
+        <div class="card p-5">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:#eef0f2;color:#44546a"><i class="ph ph-house-line text-2xl"></i></div>
+                <p class="text-sm font-medium" style="color:var(--text-secondary)">Cobertura del padrón</p>
+            </div>
+            <p class="text-3xl font-bold tabular" style="color:var(--text-primary)" id="kpiCobertura">0%</p>
+            <p class="text-xs mt-1" style="color:var(--text-muted)"><span id="kpiConHist">0</span> de <span id="kpiPredios">0</span> predios con historial financiero</p>
+        </div>
+    </section>
+
+    <!-- ============ SEMAFORO POR ETAPA ============ -->
+    <section class="card p-6 mb-6">
+        <div class="flex justify-between items-start mb-1">
+            <div>
+                <h2 class="text-lg font-bold" style="color:var(--text-primary)">Semáforo de aportes por etapa</h2>
+                <p class="text-sm" style="color:var(--text-secondary)">Distribución de predios según su estado de cuenta.</p>
+            </div>
+        </div>
+
+        <!-- Leyenda: estado nunca por color solo (icono + etiqueta) -->
+        <div class="flex flex-wrap gap-x-6 gap-y-2 my-4 text-sm">
+            <span class="flex items-center gap-1.5"><i class="ph-fill ph-check-circle text-lg" style="color:var(--st-good)"></i><span style="color:var(--text-secondary)">Al día</span></span>
+            <span class="flex items-center gap-1.5"><i class="ph-fill ph-x-circle text-lg" style="color:var(--st-critical)"></i><span style="color:var(--text-secondary)">En retraso</span></span>
+            <span class="flex items-center gap-1.5"><i class="ph-fill ph-warning-circle text-lg" style="color:var(--st-warning)"></i><span style="color:var(--text-secondary)">En revisión</span></span>
+            <span class="flex items-center gap-1.5"><i class="ph-fill ph-minus-circle text-lg" style="color:var(--st-neutral)"></i><span style="color:var(--text-secondary)">Sin historial / ex asociado</span></span>
+        </div>
+
+        <div id="semaforoWrap" class="space-y-5"></div>
+    </section>
+
+    <!-- ============ GRAFICOS ============ -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <section class="card p-6">
+            <h2 class="text-lg font-bold mb-1" style="color:var(--text-primary)">Ingresos por concepto</h2>
+            <p class="text-sm mb-4" style="color:var(--text-secondary)">Acumulado del ejercicio, en soles.</p>
+            <div class="chart-box" style="height:340px"><canvas id="chIngresos"></canvas></div>
+            <details class="mt-3">
+                <summary class="text-xs font-semibold text-blue-600 hover:underline">Ver como tabla</summary>
+                <div id="tblIngresos" class="mt-2 overflow-x-auto"></div>
+            </details>
+        </section>
+
+        <section class="card p-6">
+            <h2 class="text-lg font-bold mb-1" style="color:var(--text-primary)">Egresos por centro de costo</h2>
+            <p class="text-sm mb-4" style="color:var(--text-secondary)">Acumulado del ejercicio, en soles.</p>
+            <div class="chart-box" style="height:340px"><canvas id="chEgresos"></canvas></div>
+            <details class="mt-3">
+                <summary class="text-xs font-semibold text-blue-600 hover:underline">Ver como tabla</summary>
+                <div id="tblEgresos" class="mt-2 overflow-x-auto"></div>
+            </details>
+        </section>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+        <!-- Antiguedad de deuda -->
+        <section class="card p-6 lg:col-span-2">
+            <h2 class="text-lg font-bold mb-1" style="color:var(--text-primary)">Antigüedad de la deuda</h2>
+            <p class="text-sm mb-4" style="color:var(--text-secondary)">Monto pendiente según meses de atraso.</p>
+            <div class="chart-box" style="height:280px"><canvas id="chAntiguedad"></canvas></div>
+            <details class="mt-3">
+                <summary class="text-xs font-semibold text-blue-600 hover:underline">Ver como tabla</summary>
+                <div id="tblAntiguedad" class="mt-2 overflow-x-auto"></div>
+            </details>
+        </section>
+
+        <!-- Conciliacion -->
+        <section id="conciliacion" class="card p-6 lg:col-span-3">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 class="text-lg font-bold" style="color:var(--text-primary)">Conciliación bancaria pendiente</h2>
+                    <p class="text-sm" style="color:var(--text-secondary)">Abonos recibidos sin propietario asignado. Los resuelve la Junta Directiva.</p>
+                </div>
+                <span class="tag bg-amber-100 text-amber-800 flex items-center gap-1 flex-shrink-0">
+                    <i class="ph-fill ph-warning-circle"></i> <span id="pillNoIdent">0</span> en suspenso
+                </span>
+            </div>
+            <div class="overflow-x-auto" style="max-height:280px">
+                <table class="w-full text-sm viz-table">
+                    <thead class="sticky top-0" style="background:var(--surface-1)">
+                        <tr class="text-left text-xs uppercase tracking-wide">
+                            <th class="py-2 pr-3">Fecha</th>
+                            <th class="py-2 pr-3">Descripción del extracto</th>
+                            <th class="py-2 pr-3">N° Operación</th>
+                            <th class="py-2 pr-3 text-right">Monto</th>
+                            <th class="py-2 text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbConciliacion"></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- ============ ESTADO DE CUENTA ============ -->
+    <section class="card p-6 mb-6">
+        <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+            <div>
+                <h2 class="text-lg font-bold" style="color:var(--text-primary)">Estado de cuenta &mdash; mayores deudores</h2>
+                <p class="text-sm" style="color:var(--text-secondary)">Ordenado por monto pendiente. Nombres ficticios en esta maqueta.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <input id="buscador" type="text" placeholder="Buscar predio o propietario..."
+                       class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-64 focus:ring-blue-500 focus:border-blue-500">
+                <button class="border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-1">
+                    <i class="ph ph-funnel"></i> Filtros
+                </button>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm viz-table">
+                <thead>
+                    <tr class="text-left text-xs uppercase tracking-wide">
+                        <th class="py-2 pr-3">Predio</th>
+                        <th class="py-2 pr-3">Propietario</th>
+                        <th class="py-2 pr-3 text-center">Esperados</th>
+                        <th class="py-2 pr-3 text-center">Pagados</th>
+                        <th class="py-2 pr-3 text-center">Pendientes</th>
+                        <th class="py-2 pr-3 text-right">Deuda</th>
+                        <th class="py-2">Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="tbEECC"></tbody>
+            </table>
+        </div>
+        <p class="text-xs mt-3" style="color:var(--text-muted)">
+            Mostrando 12 de <span id="totalMorosos">0</span> predios con deuda. La versión final pagina y exporta el listado completo.
+        </p>
+    </section>
+
+    <footer class="text-xs text-center pb-6" style="color:var(--text-muted)">
+        Fuente de las cifras: <em>Control Financiero Villa Alameda Sur</em>, corte 30-07-2026.
+        Los importes agregados son reales; los datos personales de la tabla son ficticios por cumplimiento de la Ley 29733.
+    </footer>
+</div>
+
+<script>
+// =====================================================================
+//  DATOS  (en el sistema final llegan por fetch() desde la API FastAPI)
+// =====================================================================
+const CSS = getComputedStyle(document.querySelector('.viz-root'));
+const c = n => CSS.getPropertyValue(n).trim();
+
+const DATA = {
+    fechaCorte: '30/07/2026',
+    resumen: { ingresos: 119113.52, egresos: 113635.84, saldo: 5477.68,
+               deuda: 12270.00, morosos: 123, noIdentificado: 898.00,
+               predios: 291, conHistorial: 195 },
+
+    semaforo: [
+        { etapa: 'Villa II',  total: 201, alDia: 41, retraso: 112, revision: 2, neutral: 46 },
+        { etapa: 'Villa III', total: 90,  alDia: 28, retraso: 11,  revision: 0, neutral: 51 }
+    ],
+
+    ingresos: [
+        ['Cuota Mantenimiento Villa II',        65949.52],
+        ['Control Remoto Villa II',             15223.00],
+        ['Automatización Rejas Villa II',       13780.00],
+        ['Cuota Extraordinaria Reforest. V-II',  6100.00],
+        ['Cuota Mantenimiento Villa III',        6000.50],
+        ['Cuota Extraordinaria Reforest. V-III', 3900.00],
+        ['Control Remoto Villa III',             3758.50],
+        ['Automatización Rejas Villa III',       3300.00],
+        ['No identificados',                      898.00],
+        ['Cuota de limpieza',                     184.00],
+        ['Saldo inicial Reforestación',            20.00]
+    ],
+
+    egresos: [
+        ['Seguridad',        56233.03],
+        ['Automatización',   45659.75],
+        ['Áreas Comunes',     3320.50],
+        ['Reforestación',     3289.70],
+        ['Entrega a rendir',  3000.00],
+        ['Integración',        908.43],
+        ['Trámites',           527.38],
+        ['Limpieza',           397.05],
+        ['Caja chica',         300.00]
+    ],
+
+    antiguedad: [
+        ['1 a 3 meses',    4320.00],
+        ['4 a 6 meses',    2460.00],
+        ['7 a 12 meses',   4110.00],
+        ['Más de 12 meses',1380.00]
+    ],
+
+    conciliacion: [
+        ['01/04/2026','TRAN.CTAS.TERC.BM','2586085',  30.00],
+        ['13/04/2026','DEPOSITO AG 991895','26696',   30.50],
+        ['01/05/2026','TRANSF.BCO.NACION','2496308',  30.00],
+        ['02/05/2026','TRAN.CTAS.TERC.BM','3331318',  30.00],
+        ['01/06/2026','TRAN.CTAS.TERC.BM','5523100',  30.00],
+        ['05/06/2026','TRANSF.BCO.BBVA','2255685',   100.00],
+        ['05/06/2026','TRAN.CTAS.TERC.BM','5444932', 100.00],
+        ['05/06/2026','TRAN.CTAS.TERC.BM','6458092',  30.00],
+        ['05/06/2026','TRAN.CTAS.TERC.BM','6469919',  30.00]
+    ],
+
+    // Nombres FICTICIOS. Cifras de meses y deuda reales.
+    eecc: [
+        ['II-D-24','Rosa Mendoza Villar',      17, 1,16,480.00],
+        ['II-G-17','Sin propietario registrado',17,1,16,480.00],
+        ['II-A-22','Carmen Loayza Prado',      17, 3,14,420.00],
+        ['II-C-15','Diego Ferrer Anticona',    16, 5,11,330.00],
+        ['II-G-9', 'Manuel Quispe Ilizarbe',   18, 7,11,330.00],
+        ['II-B-15','Lucía Paredes Chumpitaz',  18, 8,10,300.00],
+        ['II-D-3', 'Elena Ramos Zavaleta',     16, 6,10,300.00],
+        ['II-D-16','Gianina Portal Sifuentes', 18, 9, 9,270.00],
+        ['II-E-19','Sofía Cárdenas Nolasco',   17, 8, 9,270.00],
+        ['II-A-7', 'Andrés Salvatierra Lino',   9, 1, 8,240.00],
+        ['II-A-8', 'Joaquín Salvatierra Lino',  9, 1, 8,240.00],
+        ['II-A-20','Marina Bustamante Ríos',   18,10, 8,240.00]
+    ],
+    totalMorosos: 124
+};
+
+const S = v => 'S/ ' + v.toLocaleString('es-PE', {minimumFractionDigits:2, maximumFractionDigits:2});
+const Sc = v => 'S/ ' + v.toLocaleString('es-PE', {maximumFractionDigits:0});
+
+// =====================================================================
+//  KPIs
+// =====================================================================
+(function pintarKPIs(){
+    const r = DATA.resumen;
+    document.getElementById('fechaCorte').textContent  = DATA.fechaCorte;
+    document.getElementById('kpiIngresos').textContent = S(r.ingresos);
+    document.getElementById('kpiEgresos').textContent  = S(r.egresos);
+    document.getElementById('kpiSaldo').textContent    = S(r.saldo);
+    document.getElementById('kpiDeuda').textContent    = S(r.deuda);
+    document.getElementById('kpiMorosos').textContent  = r.morosos;
+    document.getElementById('kpiNoIdent').textContent  = S(r.noIdentificado);
+    document.getElementById('kpiPredios').textContent  = r.predios;
+    document.getElementById('kpiConHist').textContent  = r.conHistorial;
+    document.getElementById('kpiCobertura').textContent= Math.round(r.conHistorial/r.predios*100) + '%';
+    document.getElementById('pillNoIdent').textContent = S(r.noIdentificado);
+    document.getElementById('totalMorosos').textContent= DATA.totalMorosos;
+})();
+
+// =====================================================================
+//  SEMAFORO  (barra apilada, 2px de separacion entre segmentos)
+// =====================================================================
+(function pintarSemaforo(){
+    const wrap = document.getElementById('semaforoWrap');
+    const segs = [
+        {k:'alDia',    label:'Al día',      color:'--st-good',     icon:'ph-check-circle'},
+        {k:'retraso',  label:'En retraso',  color:'--st-critical', icon:'ph-x-circle'},
+        {k:'revision', label:'En revisión', color:'--st-warning',  icon:'ph-warning-circle'},
+        {k:'neutral',  label:'Sin historial',color:'--st-neutral', icon:'ph-minus-circle'}
+    ];
+    wrap.innerHTML = DATA.semaforo.map(e => {
+        const barras = segs.filter(s => e[s.k] > 0).map(s => {
+            const pct = (e[s.k] / e.total * 100);
+            return `<div class="seg" title="${s.label}: ${e[s.k]} predios"
+                         style="width:calc(${pct}% - 2px); background:${c(s.color)}; margin-right:2px; border-radius:3px;"></div>`;
+        }).join('');
+        const chips = segs.filter(s => e[s.k] > 0).map(s =>
+            `<span class="flex items-center gap-1 text-xs" style="color:var(--text-secondary)">
+                <i class="ph-fill ${s.icon}" style="color:${c(s.color)}"></i>
+                <strong class="tabular" style="color:var(--text-primary)">${e[s.k]}</strong> ${s.label}
+             </span>`).join('');
+        return `
+        <div>
+            <div class="flex justify-between items-baseline mb-1.5">
+                <span class="font-semibold" style="color:var(--text-primary)">${e.etapa}</span>
+                <span class="text-sm tabular" style="color:var(--text-muted)">${e.total} predios</span>
+            </div>
+            <div class="flex w-full h-6 rounded overflow-hidden" style="background:#eef0f2">${barras}</div>
+            <div class="flex flex-wrap gap-x-5 gap-y-1 mt-2">${chips}</div>
+        </div>`;
+    }).join('');
+})();
+
+// =====================================================================
+//  CHART.JS — configuracion comun
+// =====================================================================
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = c('--text-muted');
+
+// Plugin: etiqueta directa al final de cada barra (selectiva, no en todo punto)
+const valueLabel = {
+    id: 'valueLabel',
+    afterDatasetsDraw(chart, args, opts) {
+        const {ctx} = chart;
+        const meta = chart.getDatasetMeta(0);
+        const horiz = chart.options.indexAxis === 'y';
+        ctx.save();
+        ctx.font = '600 10px Inter, sans-serif';
+        ctx.fillStyle = c('--text-secondary');
+        meta.data.forEach((bar, i) => {
+            const v = chart.data.datasets[0].data[i];
+            const txt = Sc(v);
+            if (horiz) {
+                ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                ctx.fillText(txt, bar.x + 6, bar.y);
+            } else {
+                ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+                ctx.fillText(txt, bar.x, bar.y - 5);
+            }
+        });
+        ctx.restore();
+    }
+};
+
+const tooltipCfg = {
+    backgroundColor: '#0b0b0b', padding: 10, cornerRadius: 6, displayColors: false,
+    titleFont: {weight: '600', size: 12}, bodyFont: {size: 12},
+    callbacks: { label: ctx => S(ctx.parsed.x !== undefined && ctx.chart.options.indexAxis === 'y' ? ctx.parsed.x : ctx.parsed.y) }
+};
+
+function barraHorizontal(canvasId, filas, colorRole) {
+    return new Chart(document.getElementById(canvasId), {
+        type: 'bar',
+        data: {
+            labels: filas.map(f => f[0]),
+            datasets: [{
+                data: filas.map(f => f[1]),
+                backgroundColor: c(colorRole),
+                borderRadius: {topLeft:0, bottomLeft:0, topRight:4, bottomRight:4},
+                borderSkipped: false,
+                barThickness: 14
+            }]
+        },
+        options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            layout: {padding: {right: 62}},
+            plugins: { legend: {display: false}, tooltip: tooltipCfg },
+            scales: {
+                x: { grid: {color: c('--gridline'), drawTicks: false},
+                     border: {color: c('--baseline')},
+                     ticks: {callback: v => Sc(v), maxRotation: 0, autoSkip: true, maxTicksLimit: 5} },
+                y: { grid: {display: false}, border: {display: false},
+                     ticks: {color: c('--text-secondary'), font:{size: 10.5}} }
+            }
+        },
+        plugins: [valueLabel]
+    });
+}
+
+barraHorizontal('chIngresos', DATA.ingresos, '--mag-ingreso');
+barraHorizontal('chEgresos',  DATA.egresos,  '--mag-egreso');
+
+// Antiguedad: rampa ordinal de un solo tono, la severidad crece con la oscuridad
+new Chart(document.getElementById('chAntiguedad'), {
+    type: 'bar',
+    data: {
+        labels: DATA.antiguedad.map(f => f[0]),
+        datasets: [{
+            data: DATA.antiguedad.map(f => f[1]),
+            backgroundColor: [c('--age-1'), c('--age-2'), c('--age-3'), c('--age-4')],
+            borderRadius: {topLeft:4, topRight:4, bottomLeft:0, bottomRight:0},
+            borderSkipped: false,
+            barThickness: 34
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        layout: {padding: {top: 22}},
+        plugins: { legend: {display: false}, tooltip: tooltipCfg },
+        scales: {
+            y: { grid: {color: c('--gridline'), drawTicks: false},
+                 border: {color: c('--baseline')},
+                 ticks: {callback: v => Sc(v), maxTicksLimit: 6} },
+            x: { grid: {display: false}, border: {color: c('--baseline')},
+                 ticks: {color: c('--text-secondary')} }
+        }
+    },
+    plugins: [valueLabel]
+});
+
+// =====================================================================
+//  VISTAS DE TABLA (accesibilidad: identidad nunca solo por color)
+// =====================================================================
+function tablaSimple(destino, filas, encabezado) {
+    const total = filas.reduce((a, f) => a + f[1], 0);
+    document.getElementById(destino).innerHTML = `
+        <table class="w-full text-xs viz-table">
+            <thead><tr class="text-left uppercase tracking-wide">
+                <th class="py-1.5 pr-3">${encabezado}</th>
+                <th class="py-1.5 text-right">Monto</th>
+                <th class="py-1.5 pl-3 text-right">%</th>
+            </tr></thead>
+            <tbody>
+                ${filas.map(f => `<tr>
+                    <td class="py-1.5 pr-3" style="color:var(--text-secondary)">${f[0]}</td>
+                    <td class="py-1.5 text-right tabular">${S(f[1])}</td>
+                    <td class="py-1.5 pl-3 text-right tabular" style="color:var(--text-muted)">${(f[1]/total*100).toFixed(1)}%</td>
+                </tr>`).join('')}
+                <tr class="font-bold"><td class="py-1.5 pr-3">Total</td>
+                    <td class="py-1.5 text-right tabular">${S(total)}</td>
+                    <td class="py-1.5 pl-3 text-right tabular">100.0%</td></tr>
+            </tbody>
+        </table>`;
+}
+tablaSimple('tblIngresos',   DATA.ingresos,   'Concepto');
+tablaSimple('tblEgresos',    DATA.egresos,    'Centro de costo');
+tablaSimple('tblAntiguedad', DATA.antiguedad, 'Antigüedad');
+
+// =====================================================================
+//  CONCILIACION
+// =====================================================================
+document.getElementById('tbConciliacion').innerHTML = DATA.conciliacion.map(m => `
+    <tr class="hover:bg-gray-50">
+        <td class="py-2 pr-3 tabular whitespace-nowrap">${m[0]}</td>
+        <td class="py-2 pr-3" style="color:var(--text-secondary)">${m[1]}</td>
+        <td class="py-2 pr-3 tabular" style="color:var(--text-muted)">${m[2]}</td>
+        <td class="py-2 pr-3 text-right tabular font-semibold">${S(m[3])}</td>
+        <td class="py-2 text-right">
+            <button class="text-blue-600 hover:underline font-semibold text-xs whitespace-nowrap">
+                <i class="ph ph-link"></i> Asignar
+            </button>
+        </td>
+    </tr>`).join('');
+
+// =====================================================================
+//  ESTADO DE CUENTA
+// =====================================================================
+function pintarEECC(filtro = '') {
+    const q = filtro.toLowerCase();
+    const filas = DATA.eecc.filter(f => f[0].toLowerCase().includes(q) || f[1].toLowerCase().includes(q));
+    document.getElementById('tbEECC').innerHTML = filas.length ? filas.map(f => `
+        <tr class="hover:bg-gray-50">
+            <td class="py-2 pr-3 font-semibold tabular whitespace-nowrap">${f[0]}</td>
+            <td class="py-2 pr-3" style="color:var(--text-secondary)">${f[1]}</td>
+            <td class="py-2 pr-3 text-center tabular">${f[2]}</td>
+            <td class="py-2 pr-3 text-center tabular">${f[3]}</td>
+            <td class="py-2 pr-3 text-center tabular font-semibold">${f[4]}</td>
+            <td class="py-2 pr-3 text-right tabular font-semibold">${S(f[5])}</td>
+            <td class="py-2">
+                <span class="flex items-center gap-1 text-xs font-semibold" style="color:var(--st-critical)">
+                    <i class="ph-fill ph-x-circle text-base"></i> En retraso
+                </span>
+            </td>
+        </tr>`).join('')
+        : `<tr><td colspan="7" class="py-6 text-center" style="color:var(--text-muted)">Sin resultados.</td></tr>`;
+}
+pintarEECC();
+document.getElementById('buscador').addEventListener('input', e => pintarEECC(e.target.value));
+
+// =====================================================================
+//  ACCIONES DE MAQUETA
+// =====================================================================
+document.getElementById('btnExportar').addEventListener('click', function () {
+    const b = this, o = b.innerHTML;
+    b.innerHTML = '<i class="ph ph-spinner text-lg"></i> Generando...';
+    b.disabled = true;
+    setTimeout(() => {
+        b.innerHTML = '<i class="ph ph-check-circle text-lg"></i> Descargado';
+        setTimeout(() => { b.innerHTML = o; b.disabled = false; }, 1600);
+    }, 900);
+});
+
+['fEtapa','fPeriodo'].forEach(id => document.getElementById(id).addEventListener('change', () => {
+    console.log('Maqueta: en el sistema final este filtro dispara un fetch() a la API.');
+}));
+</script>
+</body>
+</html>
