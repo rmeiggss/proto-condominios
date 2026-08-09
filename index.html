@@ -113,6 +113,7 @@
                     <p class="font-semibold text-gray-600 mb-1">Usuarios de demostración</p>
                     <p><code class="bg-gray-100 px-1.5 py-0.5 rounded">admin</code> Administrador &middot;
                         <code class="bg-gray-100 px-1.5 py-0.5 rounded">finanzas</code> Financiero &middot;
+                        <code class="bg-gray-100 px-1.5 py-0.5 rounded">junta</code> Junta Directiva &middot;
                         cualquier otro &rarr; Propietario
                     </p>
                 </div>
@@ -132,11 +133,14 @@
 
             // Lógica de redirección según el rol del usuario
             if (username === '5555555' || username === 'admin') {
-                // Rol ADMIN -> menú de gestión
-                window.location.href = 'PortalAdministrador.html';
+                // Rol ADMINISTRADOR -> portal de gestion, filtrado a lo que puede ver ese rol
+                window.location.href = 'PortalAdministrador.html?role=admin';
             } else if (username === '7777777' || username === 'finanzas') {
-                // Rol FINANCIERO -> dashboard financiero (acceso directo, sin pasar por el menú admin)
-                window.location.href = 'DashboardFinanciero.html';
+                // Rol FINANCIERO -> mismo portal de gestion, filtrado a su propio menu
+                window.location.href = 'PortalAdministrador.html?role=financiero';
+            } else if (username === '9999999' || username === 'junta') {
+                // Rol JUNTA_DIRECTIVA -> mismo portal de gestion, solo lectura (reportes y dashboard)
+                window.location.href = 'PortalAdministrador.html?role=junta';
             } else {
                 // Rol PROPIETARIO -> portal del propietario
                 window.location.href = 'Portal.html';
